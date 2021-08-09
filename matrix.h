@@ -251,92 +251,41 @@ public:
 								break;
 							else cout << " Something is Wrong" << endl;
 						}
-					/*
-						else if (r == N.Rows_Count - 1)
-						{
-							for (size_t c = i + 1; c < N.Rows_Count; c++)
-								if (N.GetItem(i,c) != static_cast<T>(0))
-								{
-									if(N.SelfSwapColumns(i, c) && M.SelfSwapColumns(i, c))
-										break;
-									else
-										cout << " Something is Wrong" << endl;
-								}
-							cout << " Something is Wrong" << endl;
-							return M;
-						}
-						*/
-					cout << "LLLLLLLLLLLLLLLLLLLLLLLLLLLL" << endl;
-					N.Show();
-					cout << "LLLLLLLLLLLLLLLLLLLLLLLLLLLL" << endl;
 				}
-	//			{
-					// Divid the raw by the corner item
-				//	for (auto& z : N.Rows.at(i))
-				//		z = z / Corner_Item;
-					for (size_t j = 0; j < N.Columns_Count; j++)
+				for (size_t j = 0; j < N.Columns_Count; j++)
+				{
+					T& p1 = static_cast<Vector&>(M.Rows.at(i)).at(j);
+					T& p2 = static_cast<Vector&>(N.Rows.at(i)).at(j);
+					p1=p1/ Corner_Item;
+					p2=p2/ Corner_Item;
+				}
+				static_cast<Vector&>(N.Rows.at(i)).at(i) = static_cast<T>(1);
+				cout << "after the first division at each row" << endl;
+				cout << " Row #:" << i << " is devided by " << Corner_Item << endl;
+				N.Show();
+				M.Show();
+				cout << "------------------------------------" << endl;
+				// All raws
+				for (size_t i2 = 0; i2 < this->Rows_Count; i2++)
+				{
+					if (i2 != i)
 					{
-						T& p1 = static_cast<Vector&>(M.Rows.at(i)).at(j);
-						T& p2 = static_cast<Vector&>(N.Rows.at(i)).at(j);
-						p1=p1/ Corner_Item;
-						p2=p2/ Corner_Item;
-					}
-					static_cast<Vector&>(N.Rows.at(i)).at(i) = static_cast<T>(1);
-					cout << "after the first division at each row" << endl;
-					cout << " Row #:" << i << " is devided by " << Corner_Item << endl;
-					N.Show();
-					M.Show();
-					cout << "------------------------------------" << endl;
-					// All raws
-					for (size_t i2 = 0; i2 < this->Rows_Count; i2++)
-					{
-						if (i2 != i)
+						T Corner_Item2 = N.GetItem(i2, i);
+						if (Corner_Item2 != static_cast<T>(0))
 						{
-							T Corner_Item2 = N.GetItem(i2, i);
-							if (Corner_Item2 != static_cast<T>(0))
+							for (size_t j2 = 0; j2 < N.Columns_Count; j2++)
 							{
-								for (size_t j2 = 0; j2 < N.Columns_Count; j2++)
-								{
-									T& p1 = static_cast<Vector&>(M.Rows.at(i)).at(j2);
-									T& p2 = static_cast<Vector&>(N.Rows.at(i)).at(j2);
-									T& p3 = static_cast<Vector&>(M.Rows.at(i2)).at(j2);
-									T& p4 = static_cast<Vector&>(N.Rows.at(i2)).at(j2);
-									p3 = p3-(p1 * Corner_Item2);
-									p4 = p4-(p2 * Corner_Item2);
-								}
+								T& p1 = static_cast<Vector&>(M.Rows.at(i)).at(j2);
+								T& p2 = static_cast<Vector&>(N.Rows.at(i)).at(j2);
+								T& p3 = static_cast<Vector&>(M.Rows.at(i2)).at(j2);
+								T& p4 = static_cast<Vector&>(N.Rows.at(i2)).at(j2);
+								p3 = p3-(p1 * Corner_Item2);
+								p4 = p4-(p2 * Corner_Item2);
 							}
 						}
 					}
-				//	N.Show();
-				//	M.Show();
-				/*
-					// All columns
-					for (size_t i2 = i+1; i2 < this->Columns_Count; i2++)
-					{
-						if (i2 != i)
-						{
-							T Corner_Item2 = N.GetItem(i, i2);
-							if (Corner_Item2 != static_cast<T>(0))
-							{
-								for (size_t j2 = 0; j2 < N.Rows_Count; j2++)
-								{
-									T& p1 = static_cast<Vector&>(M.Rows.at(j2)).at(i);
-									T& p2 = static_cast<Vector&>(N.Rows.at(j2)).at(i);
-									T& p3 = static_cast<Vector&>(M.Rows.at(j2)).at(i2);
-									T& p4 = static_cast<Vector&>(N.Rows.at(j2)).at(i2);
-									p3 = (p3 / Corner_Item2) - p1;
-									p4 = (p4 / Corner_Item2) - p2;
-								}
-							}
-						}
-					}
-					*/
-					N.Show();
-					M.Show();
-//				}
+				}
 			}
-		
-			/// 
 			return M;
 		}
 		cout << " Non-Square Matrix" << endl;
@@ -456,6 +405,20 @@ public:
 	}
 
 	void Show()
+	{
+		if (this->Rows_Count > 0)
+		{
+			if (typeid(this->GetItem(0, 0)).hash_code() == 3783695017)
+			{
+				this->Show(RECT);
+			}
+			else
+			{
+				Show_NonComplex();
+			}
+		}
+	}
+	void Show_NonComplex()
 	{
 		std::cout << " \t ********************* matrix (whatever)**************" << std::endl;
 		size_t i = 0;
