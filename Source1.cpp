@@ -6,9 +6,9 @@ typedef matrix<int> Int_matrix;
 int main(void)
 {
 	//Double_matrix A, B , C, D;
-	Float_matrix A, B, C, D;
+	//Float_matrix A, B, C, D;
 	//Int_matrix A, B, C, D;
-	//Complex_matrix C,D;
+	Complex_matrix C,D;
 	/*
 	C.AddItem(0, 0, complex<double>(12.3, 3.1));
 	C.AddItem(0, 1, complex<double>(1.3, -3.1));

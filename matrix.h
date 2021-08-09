@@ -69,7 +69,6 @@ public:
 		Matrix m2;
 		if (this->Columns_Count == m.Columns_Count && this->Rows_Count == m.Rows_Count)
 		{
-			//	cout << " Equal " << endl;
 			for (size_t r = 0; r < this->Rows_Count; r++)
 				for (size_t c = 0; c < this->Columns_Count; c++)
 					*(this->GetItemPointer(r, c)) = this->GetItem(r, c) + m.GetItem(r, c);
@@ -103,6 +102,12 @@ public:
 				this->AddItem(r, c, m.GetItem(r, c));
 			}
 		}
+		return *this;
+	}
+	Matrix& operator=(      Matrix&& m)
+	{
+		if(&m !=nullptr)
+		this = &m;
 		return *this;
 	}
 	Matrix operator+(const Matrix& m)
@@ -260,11 +265,11 @@ public:
 					p2=p2/ Corner_Item;
 				}
 				static_cast<Vector&>(N.Rows.at(i)).at(i) = static_cast<T>(1);
-				cout << "after the first division at each row" << endl;
-				cout << " Row #:" << i << " is devided by " << Corner_Item << endl;
-				N.Show();
-				M.Show();
-				cout << "------------------------------------" << endl;
+				//cout << "after the first division at each row" << endl;
+				//cout << " Row #:" << i << " is devided by " << Corner_Item << endl;
+				//N.Show();
+				//M.Show();
+				//cout << "------------------------------------" << endl;
 				// All raws
 				for (size_t i2 = 0; i2 < this->Rows_Count; i2++)
 				{
@@ -406,13 +411,13 @@ public:
 
 	void Show()
 	{
-		if (this->Rows_Count > 0)
+	//	if (this->Rows_Count > 0)
 		{
-			if (typeid(this->GetItem(0, 0)).hash_code() == 3783695017)
+	///		if (typeid(this->GetItem(0, 0)).hash_code() == 3783695017)
 			{
-				this->Show(RECT);
+	//			(static_cast<Matrix>(*this)).Show(RECT);
 			}
-			else
+	//		else
 			{
 				Show_NonComplex();
 			}
@@ -445,7 +450,7 @@ public:
 		{
 		case RECT:
 			std::cout << " \t ********************* H matrix (real , imaginary)**************" << std::endl;
-			for (std::vector<Complex> r : Rows)
+			for (auto r : Rows)
 			{
 				std::cout << setw(10) << " ";
 				std::cout << " " << i;
