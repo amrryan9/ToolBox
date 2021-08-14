@@ -270,7 +270,6 @@ public:
 				//N.Show();
 				//M.Show();
 				//cout << "------------------------------------" << endl;
-				// All raws
 				for (size_t i2 = 0; i2 < this->Rows_Count; i2++)
 				{
 					if (i2 != i)

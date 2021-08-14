@@ -1,0 +1,2 @@
+D:\C++_Code\ToolBox\Debug\ToolBox.exe
+D:\C++_Code\ToolBox\Debug\ToolBox.pdb
