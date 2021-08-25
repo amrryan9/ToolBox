@@ -416,13 +416,13 @@ public:
 
 	void Show()
 	{
-	//	if (this->Rows_Count > 0)
+		if (this->Rows_Count > 0)
 		{
-	///		if (typeid(this->GetItem(0, 0)).hash_code() == 3783695017)
+			if (typeid(this->GetItem(0, 0)).hash_code() == 3783695017)
 			{
-	//			(static_cast<Matrix>(*this)).Show(RECT);
+				(static_cast<Matrix>(*this)).Show(RECT);
 			}
-	//		else
+			else
 			{
 				Show_NonComplex();
 			}
@@ -559,7 +559,7 @@ public:
 	void WriteFile(std::string file_out)
 	{
 		// this function writes the matrix to a file
-		// check if the parent directory exixts
+		// check if the parent directory exists
 		std::string parent_directory = file_out;
 		size_t position = file_out.find_last_of("/");
 		std::string file_name = parent_directory.substr(position);
@@ -623,8 +623,6 @@ public: //Selfies
 		}
 		else
 		{
-			//		cout << " ERROR: The matrix rows count is less that the swapping rows" << endl;
-			//		cout << " n " << n << " m " << m << " this->Rows_Count " << this->Rows_Count << endl;
 			return false;
 		}
 	}
@@ -643,8 +641,6 @@ public: //Selfies
 		}
 		else
 		{
-			//		cout << " ERROR: The matrix rows count is less that the swapping rows" << endl;
-			//		cout << " n " << n << " m " << m << " this->Rows_Count " << this->Rows_Count << endl;
 			return false;
 		}
 	}
@@ -660,17 +656,13 @@ public: //Selfies
 				{
 					if (GT(this->GetItem(j, n), this->GetItem(i, n)))
 					{
-						//	cout << this->GetItem(j, n) << " is greater than " << this->GetItem(i, n) <<endl;
 						this->SelfSwapRows(i, j);
 						i = j - 1; break;
-						//	cout << "i = " << i << " j = " << j << endl;
 					}
 					j--;
 				}
 			}
 		}
-		//	else
-		//		cout << " ERROR: The matrix columns count is less that the sorting column" << endl;
 	}
 	bool SelfDeleteRow(size_t n)
 	{
@@ -680,18 +672,6 @@ public: //Selfies
 		{
 			/// sawp down the found column
 			l1 = n;
-			//	while (l1 < this->Columns_Count - 1)
-			//	{
-			//		l2 = this->Columns_Count - 1;
-			//		cout << " l1 " << l1 << " l2 " << l2 << endl;
-			//		if (!this->SwapRows(l1, l2))
-			//		{
-			//			cout << " row number " << l1 << " is the last row " << endl;
-			//			break;
-			//		}
-			//		l1++;
-			//	}
-				// delete last raw
 			static_cast<Vector>(this->Rows.at(n)).clear();
 			this->Rows.erase(this->Rows.begin() + n);
 			this->Rows_Count--;
