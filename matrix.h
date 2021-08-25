@@ -35,7 +35,13 @@ enum ComplexForm { RECT, POLAR };
 typedef std::complex<double> Complex;
 #define Vector std::vector<T>
 #define Matrix matrix<T>
-//#define Vector std::vector<T>
+typedef matrix<Complex> Complex_matrix;
+typedef matrix<double> Double_matrix;
+typedef matrix<float> Float_matrix;
+typedef matrix<int> Int_matrix;
+typedef matrix<size_t> Size_t_matrix;
+
+
 template <class T>class matrix
 {
 public:
