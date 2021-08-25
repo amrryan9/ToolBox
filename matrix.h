@@ -9,7 +9,7 @@
 #include <filesystem>
 #include <variant>
 #include<complex>
-//#include <type_traits>
+#include <type_traits>
 #include <typeinfo>
 
 /*
@@ -35,17 +35,11 @@ enum ComplexForm { RECT, POLAR };
 typedef std::complex<double> Complex;
 #define Vector std::vector<T>
 #define Matrix matrix<T>
-typedef matrix<Complex> Complex_matrix;
-typedef matrix<double> Double_matrix;
-typedef matrix<float> Float_matrix;
-typedef matrix<int> Int_matrix;
-typedef matrix<size_t> Size_t_matrix;
-
-
+//#define Vector std::vector<T>
 template <class T>class matrix
 {
-public:
-	explicit matrix(){SelfReset();}
+public: // Constructors
+	explicit matrix() { SelfReset(); }
 	matrix(const Vector& vec)  // make a single column matrix of a vector
 	{
 		SelfReset();
@@ -65,11 +59,8 @@ public:
 		if (&m != nullptr)
 			*this = m;
 		else
-			cout << "Error Moving" <<endl;
+			cout << "Error Moving" << endl;
 	}
-
-	
-	
 	bool Increment(const Matrix& m) //Increment the current matrix with the given m
 	{
 		Matrix m2;
@@ -96,8 +87,7 @@ public:
 		}
 	}
 
-
-	//***** Operator Overloading*******************
+public:	//***** Operator Overloading*******************
 	Matrix& operator=(const Matrix& m)
 	{
 		this->SelfReset();
@@ -110,10 +100,10 @@ public:
 		}
 		return *this;
 	}
-	Matrix& operator=(      Matrix&& m)
+	Matrix& operator=(Matrix&& m)
 	{
-		if(&m !=nullptr)
-		this = &m;
+		if (&m != nullptr)
+			this = &m;
 		return *this;
 	}
 	Matrix operator+(const Matrix& m)
@@ -159,13 +149,14 @@ public:
 	}
 	Matrix operator/(const Matrix& m)
 	{
-		return (*this)*m.Inverse();
+		return (*this) * m.Inverse();
 	}
 	Matrix operator/(const T x)
 	{
-		return (*this) * (static_cast<T>(1)/T);
+		return (*this) * (static_cast<T>(1) / T);
 	}
-	//*********************************************
+
+public: // Matrix Operations
 	Matrix Conjugate() const
 	{
 		if (this->Rows_Count > 0)
@@ -202,7 +193,7 @@ public:
 	Matrix ConjugateTransposed() const
 	{
 		Matrix m;
-		m =this->Conjugate();
+		m = this->Conjugate();
 		return m.Transposed();
 	}
 	Matrix Identity() const
@@ -243,7 +234,7 @@ public:
 			cout << " Singular Matrix has no inverse, det =" << this->Determinant() << endl;
 			return N;
 		}
-		
+
 		if (this->Columns_Count == this->Rows_Count)
 		{
 			Matrix M = this->Identity();
@@ -255,10 +246,10 @@ public:
 				T Corner_Item = N.GetItem(i, i);
 				if (Corner_Item == static_cast<T>(0))
 				{
-					for(size_t r=i+1;r<N.Rows_Count;r++)
+					for (size_t r = i + 1; r < N.Rows_Count; r++)
 						if (N.GetItem(r, i) != static_cast<T>(0))
 						{
-							if(N.SelfSwapRows(i, r) && M.SelfSwapRows(i, r))
+							if (N.SelfSwapRows(i, r) && M.SelfSwapRows(i, r))
 								break;
 							else cout << " Something is Wrong" << endl;
 						}
@@ -267,8 +258,8 @@ public:
 				{
 					T& p1 = static_cast<Vector&>(M.Rows.at(i)).at(j);
 					T& p2 = static_cast<Vector&>(N.Rows.at(i)).at(j);
-					p1=p1/ Corner_Item;
-					p2=p2/ Corner_Item;
+					p1 = p1 / Corner_Item;
+					p2 = p2 / Corner_Item;
 				}
 				static_cast<Vector&>(N.Rows.at(i)).at(i) = static_cast<T>(1);
 				//cout << "after the first division at each row" << endl;
@@ -289,8 +280,8 @@ public:
 								T& p2 = static_cast<Vector&>(N.Rows.at(i)).at(j2);
 								T& p3 = static_cast<Vector&>(M.Rows.at(i2)).at(j2);
 								T& p4 = static_cast<Vector&>(N.Rows.at(i2)).at(j2);
-								p3 = p3-(p1 * Corner_Item2);
-								p4 = p4-(p2 * Corner_Item2);
+								p3 = p3 - (p1 * Corner_Item2);
+								p4 = p4 - (p2 * Corner_Item2);
 							}
 						}
 					}
@@ -301,7 +292,7 @@ public:
 		cout << " Non-Square Matrix" << endl;
 		return N;
 	}
-	
+public: // Getters	
 	T AddItem(unsigned r, unsigned c, T value)
 	{
 		if (r >= Rows_Count)
@@ -413,7 +404,7 @@ public:
 		exit(1);
 		return &(this->Rows.at(0).at(0));
 	}
-
+public: //Output & Display
 	void Show()
 	{
 		if (this->Rows_Count > 0)
@@ -459,8 +450,9 @@ public:
 			{
 				std::cout << setw(10) << " ";
 				std::cout << " " << i;
-				for (Complex& c : r)
+				for (auto c_auto : r)
 				{
+					Complex c = static_cast<Complex>(c_auto);
 					std::cout << "\t(";
 					if (c.real() > 0)std::cout << " ";
 					if (c.imag() < 0)std::cout << c.real() << "\t-j" << setw(13) << -c.imag() << ")";
@@ -474,12 +466,13 @@ public:
 		case POLAR:
 			double phase, mag;
 			std::cout << " \t ********************* H matrix (magnitude |_ phase(rad))**************" << std::endl;
-			for (std::vector<Complex> r : Rows)
+			for (auto r : Rows)
 			{
 				std::cout << setw(10) << " ";
 				std::cout << " " << i;
-				for (Complex c : r)
+				for (auto c_auto : r)
 				{
+					Complex c = static_cast<Complex>(c_auto);
 					phase = std::arg(c);
 					mag = std::abs(c);//sqrt(pow(c.real(), 2) + pow(c.imag(), 2));
 					std::cout << "\t";
@@ -495,26 +488,40 @@ public:
 
 		std::cout << " \t **************************************************************" << std::endl;
 	}
-
+	void WriteFile(std::string file_out)
+	{
+		if (this->Rows_Count > 0)
+		{
+			if (typeid(this->GetItem(0, 0)).hash_code() == 3783695017)
+			{
+				(static_cast<Matrix>(*this)).WriteFile(file_out, RECT);
+			}
+			else
+			{
+				WriteFile_NonComplex(file_out);
+			}
+		}
+	}
 	void WriteFile(std::string file_out, ComplexForm form)
 	{
 		// this function writes the matrix to a file
+		vector<size_t> Indices;
 		std::ofstream out{ file_out, std::ios_base::out | std::ios_base::trunc };
 		std::ostream_iterator<string> out_iter2{ out, " " };
 		vector<std::string>row;
 		std::stringstream converter;
 		std::string s, i_s;
-		int i_index = 0;
+		size_t i_index = 0;
 		switch (form)
 		{
 		case RECT:
-			for (std::vector<Complex>& r : Rows)
+			for (auto& r : Rows)
 			{
-				if (i_index < this->Indices.size()) { converter << this->Indices.at(i_index); converter >> i_s; converter.clear(); row.push_back(i_s); }
+				if (i_index < Indices.size()) { converter << Indices.at(i_index); converter >> i_s; converter.clear(); row.push_back(i_s); }
 				row.push_back("\t");
-				for (Complex& i : r)
+				for (auto ii : r)
 				{
-					//row.push_back("(");
+					Complex i = static_cast<Complex>(ii);
 					converter << i.real(); converter >> s; converter.clear();
 					row.push_back(s);
 					row.push_back("\t");
@@ -523,9 +530,7 @@ public:
 					row.push_back("\t");
 				}
 				std::copy(std::begin(row), std::end(row), out_iter2);
-				//	std::copy(std::begin(row), std::end(row), std::ostream_iterator<string>{std::cout, " "});
 				out_iter2 = "\n";
-				//	cout << endl;
 				row.clear();
 				i_index++;
 			}
@@ -533,12 +538,13 @@ public:
 		case POLAR:
 			double phase;
 			double mag;
-			for (std::vector<Complex>& r : Rows)
+			for (auto& r : Rows)
 			{
-				if (i_index < this->Indices.size()) { converter << this->Indices.at(i_index); converter >> i_s; converter.clear(); row.push_back(i_s); }
+				if (i_index < Indices.size()) { converter << Indices.at(i_index); converter >> i_s; converter.clear(); row.push_back(i_s); }
 				row.push_back("\t");
-				for (Complex& i : r)
+				for (auto ii : r)
 				{
+					Complex i = static_cast<Complex>(ii);
 					phase = std::arg(i);
 					mag = std::abs(i);
 					converter << mag; converter >> s; converter.clear();
@@ -553,13 +559,13 @@ public:
 				row.clear();
 				i_index++;
 			}
-
 		}
 	}
-	void WriteFile(std::string file_out)
+	void WriteFile_NonComplex(std::string file_out)
 	{
 		// this function writes the matrix to a file
-		// check if the parent directory exists
+		// check if the parent directory exixts
+		vector<size_t> Indices;
 		std::string parent_directory = file_out;
 		size_t position = file_out.find_last_of("/");
 		std::string file_name = parent_directory.substr(position);
@@ -573,10 +579,10 @@ public:
 		vector<std::string>row;
 		std::stringstream converter;
 		std::string s, i_s;
-		int i_index = 0;
+		size_t i_index = 0;
 		for (auto r : Rows)
 		{
-			if (i_index < this->Indices.size()) { converter << this->Indices.at(i_index); converter >> i_s; converter.clear(); row.push_back(i_s); row.push_back("\t"); }
+			if (i_index < Indices.size()) { converter << Indices.at(i_index); converter >> i_s; converter.clear(); row.push_back(i_s); row.push_back("\t"); }
 
 			for (auto i : r)
 			{
@@ -590,7 +596,19 @@ public:
 			i_index++;
 		}
 	}
-
+public: // Convert to Tables. A Table that contains the rows of the item matrices in one table record per each matric item
+	static Matrix AppendToTable(Matrix& table, Matrix& item)
+	{
+		unsigned current_row = table.Rows_Count;
+		unsigned i = 0;
+		for (unsigned r = 0; r < item.Rows_Count; r++)
+			for (unsigned c = 0; c < item.Columns_Count; c++)
+			{
+				table.AddItem(current_row, i, item.GetItem(r, c));
+				i++;
+			}
+		return table;
+	}
 	~matrix() { SelfReset(); }
 public: //Selfies
 	bool GT(T lhs, T rhs)
@@ -623,6 +641,8 @@ public: //Selfies
 		}
 		else
 		{
+			//		cout << " ERROR: The matrix rows count is less that the swapping rows" << endl;
+			//		cout << " n " << n << " m " << m << " this->Rows_Count " << this->Rows_Count << endl;
 			return false;
 		}
 	}
@@ -634,13 +654,15 @@ public: //Selfies
 			for (size_t j = 0; j < this->Rows_Count; j++)
 			{
 				temp_column.push_back(this->GetItem(j, n));
-				static_cast<Vector&>(this->Rows.at(j)).at(n) = this->GetItem(j,m);
+				static_cast<Vector&>(this->Rows.at(j)).at(n) = this->GetItem(j, m);
 				static_cast<Vector&>(this->Rows.at(j)).at(m) = temp_column.at(j);
 			}
 			return true;
 		}
 		else
 		{
+			//		cout << " ERROR: The matrix rows count is less that the swapping rows" << endl;
+			//		cout << " n " << n << " m " << m << " this->Rows_Count " << this->Rows_Count << endl;
 			return false;
 		}
 	}
@@ -656,21 +678,24 @@ public: //Selfies
 				{
 					if (GT(this->GetItem(j, n), this->GetItem(i, n)))
 					{
+						//	cout << this->GetItem(j, n) << " is greater than " << this->GetItem(i, n) <<endl;
 						this->SelfSwapRows(i, j);
 						i = j - 1; break;
+						//	cout << "i = " << i << " j = " << j << endl;
 					}
 					j--;
 				}
 			}
 		}
+		//	else
+		//		cout << " ERROR: The matrix columns count is less that the sorting column" << endl;
 	}
 	bool SelfDeleteRow(size_t n)
 	{
-		//	cout << " DElete row :  " << n << endl;
+		//	cout << " Delete row :  " << n << endl;
 		size_t l1, l2;
 		if (this->Rows_Count > n)
 		{
-			/// sawp down the found column
 			l1 = n;
 			static_cast<Vector>(this->Rows.at(n)).clear();
 			this->Rows.erase(this->Rows.begin() + n);
@@ -695,10 +720,31 @@ public:
 	std::vector<Vector> Rows;
 	unsigned Rows_Count;
 	unsigned Columns_Count;
-	vector<size_t> Indices;
 };
 
 //matrix<complex<double>> operator/(matrix<complex<double>>, const double);
 //matrix<double> operator/(matrix<double> matrix, const double);
 //matrix<Complex> operator/(matrix<Complex>, matrix<double>);
 
+
+template<class T, class T2>
+Matrix AppendToTable(Matrix& table, Matrix& item, vector<T2> item_extension)
+{
+	unsigned current_row = table.Rows_Count;
+	unsigned i = 0;
+	bool valid_check = false;
+
+	for (unsigned r = 0; r < item.Rows.size(); r++)
+		for (unsigned c = 0; c < item.Rows.at(r).size(); c++)
+		{
+			table.AddItem(current_row, i, item.GetItem(r, c));
+			i++;
+		}
+	size_t j = 0;
+	for (auto g : item_extension)
+	{
+		table.AddItem(current_row, i + j, static_cast<T>(g));
+		j++;
+	}
+	return table;
+}
