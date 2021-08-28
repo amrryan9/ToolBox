@@ -39,11 +39,7 @@ typedef std::complex<double> Complex;
 template <class T>class matrix
 {
 public: // Constructors
-<<<<<<< HEAD
 	explicit matrix(){SelfReset();}
-=======
-	explicit matrix() { SelfReset(); }
->>>>>>> f97bd6b073e68f3aff981d07b12f046e33d9fea2
 	matrix(const Vector& vec)  // make a single column matrix of a vector
 	{
 		SelfReset();
@@ -63,7 +59,7 @@ public: // Constructors
 		if (&m != nullptr)
 			*this = m;
 		else
-			cout << "Error Moving" << endl;
+			cout << "Error Moving" <<endl;
 	}
 	bool Increment(const Matrix& m) //Increment the current matrix with the given m
 	{
@@ -104,18 +100,12 @@ public:	//***** Operator Overloading*******************
 		}
 		return *this;
 	}
-	Matrix& operator=(Matrix&& m)
+	Matrix& operator=(      Matrix&& m)
 	{
-<<<<<<< HEAD
 	//	if(&m !=nullptr)
 	//	this = &m;
 		*this=std::move(m);//
 		return  *this;
-=======
-		if (&m != nullptr)
-			this = &m;
-		return *this;
->>>>>>> f97bd6b073e68f3aff981d07b12f046e33d9fea2
 	}
 	Matrix operator+(const Matrix& m)
 	{
@@ -160,15 +150,11 @@ public:	//***** Operator Overloading*******************
 	}
 	Matrix operator/(const Matrix& m)
 	{
-		return (*this) * m.Inverse();
+		return (*this)*m.Inverse();
 	}
 	Matrix operator/(const T x)
 	{
-<<<<<<< HEAD
 		return (*this) * (static_cast<T>(1)/x);
-=======
-		return (*this) * (static_cast<T>(1) / T);
->>>>>>> f97bd6b073e68f3aff981d07b12f046e33d9fea2
 	}
 
 public: // Matrix Operations
@@ -208,7 +194,7 @@ public: // Matrix Operations
 	Matrix ConjugateTransposed() const
 	{
 		Matrix m;
-		m = this->Conjugate();
+		m =this->Conjugate();
 		return m.Transposed();
 	}
 	Matrix Identity() const
@@ -249,7 +235,7 @@ public: // Matrix Operations
 			cout << " Singular Matrix has no inverse, det =" << this->Determinant() << endl;
 			return N;
 		}
-
+		
 		if (this->Columns_Count == this->Rows_Count)
 		{
 			Matrix M = this->Identity();
@@ -261,10 +247,10 @@ public: // Matrix Operations
 				T Corner_Item = N.GetItem(i, i);
 				if (Corner_Item == static_cast<T>(0))
 				{
-					for (size_t r = i + 1; r < N.Rows_Count; r++)
+					for(size_t r=i+1;r<N.Rows_Count;r++)
 						if (N.GetItem(r, i) != static_cast<T>(0))
 						{
-							if (N.SelfSwapRows(i, r) && M.SelfSwapRows(i, r))
+							if(N.SelfSwapRows(i, r) && M.SelfSwapRows(i, r))
 								break;
 							else cout << " Something is Wrong" << endl;
 						}
@@ -273,8 +259,8 @@ public: // Matrix Operations
 				{
 					T& p1 = static_cast<Vector&>(M.Rows.at(i)).at(j);
 					T& p2 = static_cast<Vector&>(N.Rows.at(i)).at(j);
-					p1 = p1 / Corner_Item;
-					p2 = p2 / Corner_Item;
+					p1=p1/ Corner_Item;
+					p2=p2/ Corner_Item;
 				}
 				static_cast<Vector&>(N.Rows.at(i)).at(i) = static_cast<T>(1);
 				//cout << "after the first division at each row" << endl;
@@ -295,8 +281,8 @@ public: // Matrix Operations
 								T& p2 = static_cast<Vector&>(N.Rows.at(i)).at(j2);
 								T& p3 = static_cast<Vector&>(M.Rows.at(i2)).at(j2);
 								T& p4 = static_cast<Vector&>(N.Rows.at(i2)).at(j2);
-								p3 = p3 - (p1 * Corner_Item2);
-								p4 = p4 - (p2 * Corner_Item2);
+								p3 = p3-(p1 * Corner_Item2);
+								p4 = p4-(p2 * Corner_Item2);
 							}
 						}
 					}
@@ -480,11 +466,7 @@ public: //Output & Display
 			break;
 		case POLAR:
 			double phase, mag;
-<<<<<<< HEAD
 			std::cout << " \t ********************* Matrix (magnitude |_ phase(rad))**************" << std::endl;
-=======
-			std::cout << " \t ********************* H matrix (magnitude |_ phase(rad))**************" << std::endl;
->>>>>>> f97bd6b073e68f3aff981d07b12f046e33d9fea2
 			for (auto r : Rows)
 			{
 				std::cout << setw(10) << " ";
@@ -513,11 +495,7 @@ public: //Output & Display
 		{
 			if (typeid(this->GetItem(0, 0)).hash_code() == 3783695017)
 			{
-<<<<<<< HEAD
 				(static_cast<Matrix>(*this)).WriteFile(file_out,RECT);
-=======
-				(static_cast<Matrix>(*this)).WriteFile(file_out, RECT);
->>>>>>> f97bd6b073e68f3aff981d07b12f046e33d9fea2
 			}
 			else
 			{
@@ -588,11 +566,7 @@ public: //Output & Display
 	{
 		
 		// this function writes the matrix to a file
-<<<<<<< HEAD
 		// check if the parent directory exists
-=======
-		// check if the parent directory exixts
->>>>>>> f97bd6b073e68f3aff981d07b12f046e33d9fea2
 		vector<size_t> Indices;
 		std::string parent_directory = file_out;
 		size_t position = file_out.find_last_of("/");
@@ -642,22 +616,6 @@ public: // Convert to Tables. A Table that contains the rows of the item matrice
 			}
 		return table;
 	}
-<<<<<<< HEAD
-=======
-public: // Convert to Tables. A Table that contains the rows of the item matrices in one table record per each matric item
-	static Matrix AppendToTable(Matrix& table, Matrix& item)
-	{
-		unsigned current_row = table.Rows_Count;
-		unsigned i = 0;
-		for (unsigned r = 0; r < item.Rows_Count; r++)
-			for (unsigned c = 0; c < item.Columns_Count; c++)
-			{
-				table.AddItem(current_row, i, item.GetItem(r, c));
-				i++;
-			}
-		return table;
-	}
->>>>>>> f97bd6b073e68f3aff981d07b12f046e33d9fea2
 	~matrix() { SelfReset(); }
 public: //Selfies
 	bool GT(T lhs, T rhs)
@@ -703,7 +661,7 @@ public: //Selfies
 			for (size_t j = 0; j < this->Rows_Count; j++)
 			{
 				temp_column.push_back(this->GetItem(j, n));
-				static_cast<Vector&>(this->Rows.at(j)).at(n) = this->GetItem(j, m);
+				static_cast<Vector&>(this->Rows.at(j)).at(n) = this->GetItem(j,m);
 				static_cast<Vector&>(this->Rows.at(j)).at(m) = temp_column.at(j);
 			}
 			return true;
@@ -789,7 +747,6 @@ Matrix AppendToTable(Matrix& table, Matrix& item, vector<T2> item_extension)
 			table.AddItem(current_row, i, item.GetItem(r, c));
 			i++;
 		}
-<<<<<<< HEAD
 		size_t j = 0;
 		for (auto g : item_extension)
 		{
@@ -819,13 +776,3 @@ typedef std::vector<double> Double_vector;
 typedef std::vector<float> Float_vector;
 typedef std::vector<int> Int_vector;
 typedef std::vector<size_t> Size_t_vector;
-=======
-	size_t j = 0;
-	for (auto g : item_extension)
-	{
-		table.AddItem(current_row, i + j, static_cast<T>(g));
-		j++;
-	}
-	return table;
-}
->>>>>>> f97bd6b073e68f3aff981d07b12f046e33d9fea2
