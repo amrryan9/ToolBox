@@ -35,7 +35,7 @@ enum ComplexForm { RECT, POLAR };
 typedef std::complex<double> Complex;
 #define Vector std::vector<T>
 #define Matrix matrix<T>
-//#define Vector std::vector<T>
+
 template <class T>class matrix
 {
 public: // Constructors
@@ -102,9 +102,10 @@ public:	//***** Operator Overloading*******************
 	}
 	Matrix& operator=(      Matrix&& m)
 	{
-		if(&m !=nullptr)
-		this = &m;
-		return *this;
+	//	if(&m !=nullptr)
+	//	this = &m;
+		*this=std::move(m);//
+		return  *this;
 	}
 	Matrix operator+(const Matrix& m)
 	{
@@ -153,7 +154,7 @@ public:	//***** Operator Overloading*******************
 	}
 	Matrix operator/(const T x)
 	{
-		return (*this) * (static_cast<T>(1)/T);
+		return (*this) * (static_cast<T>(1)/x);
 	}
 
 public: // Matrix Operations
@@ -396,7 +397,7 @@ public: // Getters
 		cout << " Error : item is beyond matrix boundry" << endl;
 		return static_cast<T>(0);
 	}
-	T* GetItemPointer(unsigned r, unsigned c)const // get a ref
+	T* GetItemPointer(unsigned r, unsigned c) // get a ref
 	{
 		Matrix m;
 		if (r < this->Rows_Count && c < this->Columns_Count)return &(this->Rows.at(r).at(c));
@@ -445,7 +446,7 @@ public: //Output & Display
 		switch (form)
 		{
 		case RECT:
-			std::cout << " \t ********************* H matrix (real , imaginary)**************" << std::endl;
+			std::cout << " \t ********************* Matrix (real , imaginary)**************" << std::endl;
 			for (auto r : Rows)
 			{
 				std::cout << setw(10) << " ";
@@ -465,7 +466,7 @@ public: //Output & Display
 			break;
 		case POLAR:
 			double phase, mag;
-			std::cout << " \t ********************* H matrix (magnitude |_ phase(rad))**************" << std::endl;
+			std::cout << " \t ********************* Matrix (magnitude |_ phase(rad))**************" << std::endl;
 			for (auto r : Rows)
 			{
 				std::cout << setw(10) << " ";
@@ -563,17 +564,21 @@ public: //Output & Display
 	}
 	void WriteFile_NonComplex(std::string file_out)
 	{
+		
 		// this function writes the matrix to a file
-		// check if the parent directory exixts
+		// check if the parent directory exists
 		vector<size_t> Indices;
 		std::string parent_directory = file_out;
 		size_t position = file_out.find_last_of("/");
 		std::string file_name = parent_directory.substr(position);
 		parent_directory.erase(position, file_name.size());
+		file_name.erase(0, 1);
 		if (!std::filesystem::exists(parent_directory))
 		{
 			if (std::filesystem::create_directory(parent_directory))cout << parent_directory << " Directory Created" << endl; else { cout << parent_directory << " Directory can't be created " << endl; exit(0); }
 		}
+		cout << " THE FILE NAMED : " << file_name;
+		cout << " IS CREATED AT  :" << parent_directory;
 		std::ofstream out{ file_out, std::ios_base::out | std::ios_base::trunc };
 		std::ostream_iterator<string> out_iter2{ out, " " };
 		vector<std::string>row;
@@ -595,8 +600,10 @@ public: //Output & Display
 			row.clear();
 			i_index++;
 		}
+		cout << " that contains : " << endl;
+		this->Show();
 	}
-public: // Convert to Tables. A Table that contains the rows of the item matrices in one table record per each matric item
+public: // Convert to Tables. A Table that contains the rows of the item matrices in one table record per each matrix item
 	static Matrix AppendToTable(Matrix& table, Matrix& item)
 	{
 		unsigned current_row = table.Rows_Count;
@@ -748,3 +755,24 @@ Matrix AppendToTable(Matrix& table, Matrix& item, vector<T2> item_extension)
 		}
 	return table;
 }
+template<class T, class T2>
+Matrix operator/(const Matrix& lhs, const matrix<T2>& rhs)
+{
+	// convert to this type
+	Matrix denumerator;
+	for (size_t i = 0; i < rhs.Rows_Count; i++)
+		for (size_t j = 0; j < rhs.Columns_Count; j++)
+			denumerator.AddItem(i, j, static_cast<T>(rhs.GetItem(i, j)));
+	return (lhs / denumerator);
+}
+typedef matrix<Complex> Complex_matrix;
+typedef matrix<double> Double_matrix;
+typedef matrix<float> Float_matrix;
+typedef matrix<int> Int_matrix;
+typedef matrix<size_t> Size_t_matrix;
+
+typedef std::vector<Complex> Complex_vector;
+typedef std::vector<double> Double_vector;
+typedef std::vector<float> Float_vector;
+typedef std::vector<int> Int_vector;
+typedef std::vector<size_t> Size_t_vector;
