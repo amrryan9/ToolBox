@@ -32,6 +32,7 @@ size_t size() { return count; } // Accessor for count
 
 using namespace std;
 enum ComplexForm { RECT, POLAR };
+enum FileForm { PLAIN, DECORATED };
 typedef std::complex<double> Complex;
 #define Vector std::vector<T>
 #define Matrix matrix<T>
@@ -489,46 +490,97 @@ public: //Output & Display
 
 		std::cout << " \t **************************************************************" << std::endl;
 	}
-	void WriteFile(std::string file_out)
+	void WriteFile(std::string file_out, FileForm form = FileForm::PLAIN)
 	{
 		if (this->Rows_Count > 0)
 		{
 			if (typeid(this->GetItem(0, 0)).hash_code() == 3783695017)
 			{
-				(static_cast<Matrix>(*this)).WriteFile(file_out,RECT);
+				(static_cast<Matrix>(*this)).WriteFile(file_out,RECT,form);
 			}
 			else
 			{
-				WriteFile_NonComplex(file_out);
+				WriteFile_NonComplex(file_out, form);
 			}
 		}
 	}
-	void WriteFile(std::string file_out, ComplexForm form)
+	void WriteFile(std::string file_out, ComplexForm form, FileForm file_form = FileForm::PLAIN,string header=".")
 	{
+		
 		// this function writes the matrix to a file
-		vector<size_t> Indices;
-		std::ofstream out{ file_out, std::ios_base::out | std::ios_base::trunc };
-		std::ostream_iterator<string> out_iter2{ out, " " };
+		std::string parent_directory = file_out;
+		size_t position = file_out.find_last_of("/");
+		std::string file_name = parent_directory.substr(position);
+		parent_directory.erase(position, file_name.size());
+		file_name.erase(0, 1);
+		if (!std::filesystem::exists(parent_directory))
+		{
+			if (std::filesystem::create_directory(parent_directory))cout << parent_directory << " Directory Created" << endl; else { cout << parent_directory << " Directory can't be created " << endl; exit(0); }
+		}
+		
+		
 		vector<std::string>row;
 		std::stringstream converter;
 		std::string s, i_s;
 		size_t i_index = 0;
+		string first_part,second_part;
+		switch (form)
+		{
+		case RECT:
+			first_part = "(real)"; second_part = "(i img)";
+			break;
+		case POLAR:
+			first_part = "(mag)"; second_part = "(phase)";
+			break;
+		}
+		string separator, extension;
+		switch (file_form)
+		{
+		case FileForm::PLAIN:
+			separator = "\t";
+			extension = ".txt";
+			header = "";
+			break;
+		case FileForm::DECORATED:
+			separator = ",";
+			extension = ".csv";
+			if (header == ".")
+			{
+				header = "Raw #\\Column #";///
+				for (size_t i = 0; i < this->Columns_Count; i++)
+				{
+					converter << i; converter >> i_s; converter.clear();
+					header = header + "," + i_s + first_part + "," + i_s + second_part;
+				}
+			}
+			row.push_back(header);
+			
+			break;
+		}
+		std::ofstream out{ file_out + extension, std::ios_base::out | std::ios_base::trunc };
+		std::ostream_iterator<string> out_iter2{ out, " " };
+		if (file_form == FileForm::DECORATED)
+		{
+			std::copy(std::begin(row), std::end(row), out_iter2);
+			out_iter2 = "\n";
+			row.clear();
+		}
 		switch (form)
 		{
 		case RECT:
 			for (auto& r : Rows)
 			{
-				if (i_index < Indices.size()) { converter << Indices.at(i_index); converter >> i_s; converter.clear(); row.push_back(i_s); }
-				row.push_back("\t");
+				converter << i_index; converter >> i_s; converter.clear(); row.push_back(i_s);
+				row.push_back(separator);
 				for (auto ii : r)
 				{
 					Complex i = static_cast<Complex>(ii);
 					converter << i.real(); converter >> s; converter.clear();
 					row.push_back(s);
-					row.push_back("\t");
+					row.push_back(separator);
 					converter << i.imag(); converter >> s; converter.clear();
 					row.push_back(s);
-					row.push_back("\t");
+					row.push_back(separator);
 				}
 				std::copy(std::begin(row), std::end(row), out_iter2);
 				out_iter2 = "\n";
@@ -541,8 +593,8 @@ public: //Output & Display
 			double mag;
 			for (auto& r : Rows)
 			{
-				if (i_index < Indices.size()) { converter << Indices.at(i_index); converter >> i_s; converter.clear(); row.push_back(i_s); }
-				row.push_back("\t");
+				converter << i_index; converter >> i_s; converter.clear(); row.push_back(i_s);
+				row.push_back(separator);
 				for (auto ii : r)
 				{
 					Complex i = static_cast<Complex>(ii);
@@ -550,10 +602,10 @@ public: //Output & Display
 					mag = std::abs(i);
 					converter << mag; converter >> s; converter.clear();
 					row.push_back(s);
-					row.push_back("\t");
+					row.push_back(separator);
 					converter << phase; converter >> s; converter.clear();
 					row.push_back(s);
-					row.push_back("\t");
+					row.push_back(separator);
 				}
 				std::copy(std::begin(row), std::end(row), out_iter2);
 				out_iter2 = "\n";
@@ -562,12 +614,11 @@ public: //Output & Display
 			}
 		}
 	}
-	void WriteFile_NonComplex(std::string file_out)
+	void WriteFile_NonComplex(std::string file_out, FileForm file_form = FileForm::PLAIN, string header = ".")
 	{
 		
 		// this function writes the matrix to a file
 		// check if the parent directory exists
-		vector<size_t> Indices;
 		std::string parent_directory = file_out;
 		size_t position = file_out.find_last_of("/");
 		std::string file_name = parent_directory.substr(position);
@@ -577,23 +628,52 @@ public: //Output & Display
 		{
 			if (std::filesystem::create_directory(parent_directory))cout << parent_directory << " Directory Created" << endl; else { cout << parent_directory << " Directory can't be created " << endl; exit(0); }
 		}
-		cout << " THE FILE NAMED : " << file_name;
-		cout << " IS CREATED AT  :" << parent_directory;
-		std::ofstream out{ file_out, std::ios_base::out | std::ios_base::trunc };
-		std::ostream_iterator<string> out_iter2{ out, " " };
+
 		vector<std::string>row;
 		std::stringstream converter;
 		std::string s, i_s;
 		size_t i_index = 0;
+		string separator, extension;
+		switch (file_form)
+		{
+		case FileForm::PLAIN:
+			separator = "\t";
+			extension = ".txt";
+			header = "";
+			break;
+		case FileForm::DECORATED:
+			separator = ",";
+			extension = ".csv";
+			if (header == ".")
+			{
+				header = "Raw #\\Column #";///
+				for (size_t i = 0; i < this->Columns_Count; i++)
+				{
+					converter << i; converter >> i_s; converter.clear();
+					header = header + "," + i_s;
+				}
+			}
+			row.push_back(header);
+			break;
+		}
+		std::ofstream out{ file_out + extension, std::ios_base::out | std::ios_base::trunc };
+		std::ostream_iterator<string> out_iter2{ out, " " };
+		if (file_form == FileForm::DECORATED)
+		{
+			std::copy(std::begin(row), std::end(row), out_iter2);
+			out_iter2 = "\n";
+			row.clear();
+		}
+
 		for (auto r : Rows)
 		{
-			if (i_index < Indices.size()) { converter << Indices.at(i_index); converter >> i_s; converter.clear(); row.push_back(i_s); row.push_back("\t"); }
+			converter << i_index; converter >> i_s; converter.clear(); row.push_back(i_s); row.push_back(separator);
 
 			for (auto i : r)
 			{
 				converter << i; converter >> s; converter.clear();
 				row.push_back(s);
-				row.push_back("\t");
+				row.push_back(separator);
 			}
 			std::copy(std::begin(row), std::end(row), out_iter2);
 			out_iter2 = "\n";
