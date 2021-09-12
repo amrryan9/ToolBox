@@ -11,6 +11,7 @@
 #include<complex>
 #include <type_traits>
 #include <typeinfo>
+#include <type_traits>
 
 /*
 
@@ -34,6 +35,14 @@ using namespace std;
 enum ComplexForm { RECT, POLAR };
 enum FileForm { PLAIN, DECORATED };
 typedef std::complex<double> Complex;
+
+
+typedef std::vector<Complex> Complex_vector;
+typedef std::vector<double> Double_vector;
+typedef std::vector<float> Float_vector;
+typedef std::vector<int> Int_vector;
+typedef std::vector<size_t> Size_t_vector;
+
 #define Vector std::vector<T>
 #define Matrix matrix<T>
 
@@ -157,28 +166,51 @@ public:	//***** Operator Overloading*******************
 	{
 		return (*this) * (static_cast<T>(1)/x);
 	}
+	bool write(std::ofstream& ofile)const
+	{
+		ofile.write(reinterpret_cast<const char*>(&this->Rows_Count), sizeof(this->Rows_Count));
+		ofile.write(reinterpret_cast<const char*>(&this->Columns_Count), sizeof(this->Columns_Count));
+		for (Vector r : this->Rows)
+			ofile.write(reinterpret_cast<char*>(&r[0]), r.size()*sizeof(T));
+
+		return !ofile.fail();
+	}
+	bool read(std::ifstream& ifile)
+	{
+		ifile.read(reinterpret_cast<char*>(&this->Rows_Count), sizeof(this->Rows_Count));
+		ifile.read(reinterpret_cast<char*>(&this->Columns_Count), sizeof(this->Columns_Count));
+		this->Rows.resize(this->Rows_Count);
+		for (Vector r : this->Rows)
+		{
+			r.resize(this->Columns_Count);
+			ifile.read(reinterpret_cast<char*>(&r[0]), r.size() * sizeof(T));
+		}
+		return !ifile.fail();
+	}
+	friend std::ofstream& operator<<(std::ofstream& ofile, Matrix const& m);
+	friend std::ifstream& operator<<(std::ifstream& ifile, Matrix & m);
 
 public: // Matrix Operations
 	Matrix Conjugate() const
 	{
-		if (this->Rows_Count > 0)
+if (this->Rows_Count > 0)
+{
+	if (typeid(this->GetItem(0, 0)).hash_code() == 3783695017)
+	{
+		Matrix m = *this;
+		for (unsigned r = 0; r < this->Rows.size(); r++)
 		{
-			if (typeid(this->GetItem(0, 0)).hash_code() == 3783695017)
+			for (unsigned c = 0; c < this->Rows.at(r).size(); c++)
 			{
-				Matrix m = *this;
-				for (unsigned r = 0; r < this->Rows.size(); r++)
-				{
-					for (unsigned c = 0; c < this->Rows.at(r).size(); c++)
-					{
-						cout << typeid(this->GetItem(r, c)).hash_code() << endl;
-						//cout << " Converting now" << endl;
-						m.AddItem(r, c, std::conj(this->GetItem(r, c)));
-					}
-				}
-				return m;
+				cout << typeid(this->GetItem(r, c)).hash_code() << endl;
+				//cout << " Converting now" << endl;
+				m.AddItem(r, c, std::conj(this->GetItem(r, c)));
 			}
 		}
-		return *this;
+		return m;
+	}
+}
+return *this;
 	}
 	Matrix Transposed() const
 	{
@@ -195,7 +227,7 @@ public: // Matrix Operations
 	Matrix ConjugateTransposed() const
 	{
 		Matrix m;
-		m =this->Conjugate();
+		m = this->Conjugate();
 		return m.Transposed();
 	}
 	Matrix Identity() const
@@ -230,13 +262,28 @@ public: // Matrix Operations
 	}
 	Matrix Inverse() const
 	{
+		
+		if constexpr (std::is_same_v<T, int> || std::is_same_v<T, unsigned int> || std::is_same_v<T, char> || std::is_same_v<T, unsigned char> || std::is_same_v<T, wchar_t> || std::is_same_v<T, long int> || std::is_same_v<T, long unsigned>)//  
+		{
+	//		matrix<double> alias;
+	//		for (size_t ii=0;ii<this->Rows_Count;ii++)
+	//		{
+	//			for (size_t jj = 0; jj < this->Columns_Count; jj++)
+	//			{
+	//				alias.AddItem(ii, jj,this->GetItem(ii,jj) );
+	//			}
+	//		}
+	//		return alias.Inverse();
+			cout << " WARNING : Integer types are not supported in Inverse. use float type instead " << endl;
+
+		}
 		Matrix N;
 		if (this->Determinant() == static_cast<T>(0))
 		{
 			cout << " Singular Matrix has no inverse, det =" << this->Determinant() << endl;
 			return N;
 		}
-		
+
 		if (this->Columns_Count == this->Rows_Count)
 		{
 			Matrix M = this->Identity();
@@ -248,10 +295,10 @@ public: // Matrix Operations
 				T Corner_Item = N.GetItem(i, i);
 				if (Corner_Item == static_cast<T>(0))
 				{
-					for(size_t r=i+1;r<N.Rows_Count;r++)
+					for (size_t r = i + 1; r < N.Rows_Count; r++)
 						if (N.GetItem(r, i) != static_cast<T>(0))
 						{
-							if(N.SelfSwapRows(i, r) && M.SelfSwapRows(i, r))
+							if (N.SelfSwapRows(i, r) && M.SelfSwapRows(i, r))
 								break;
 							else cout << " Something is Wrong" << endl;
 						}
@@ -260,8 +307,10 @@ public: // Matrix Operations
 				{
 					T& p1 = static_cast<Vector&>(M.Rows.at(i)).at(j);
 					T& p2 = static_cast<Vector&>(N.Rows.at(i)).at(j);
-					p1=p1/ Corner_Item;
-					p2=p2/ Corner_Item;
+					
+					p1 = p1 / Corner_Item;
+					p2 = p2 / Corner_Item;
+					
 				}
 				static_cast<Vector&>(N.Rows.at(i)).at(i) = static_cast<T>(1);
 				//cout << "after the first division at each row" << endl;
@@ -680,8 +729,8 @@ public: //Output & Display
 			row.clear();
 			i_index++;
 		}
-		cout << " that contains : " << endl;
-		this->Show();
+	//	cout << " that contains : " << endl;
+	//	this->Show();
 	}
 public: // Convert to Tables. A Table that contains the rows of the item matrices in one table record per each matrix item
 	static Matrix AppendToTable(Matrix& table, Matrix& item)
@@ -803,6 +852,7 @@ public: //Selfies
 		this->Columns_Count = 0;
 		this->Rows_Count = 0;
 	}
+
 public:
 	std::vector<Vector> Rows;
 	unsigned Rows_Count;
@@ -845,14 +895,32 @@ Matrix operator/(const Matrix& lhs, const matrix<T2>& rhs)
 			denumerator.AddItem(i, j, static_cast<T>(rhs.GetItem(i, j)));
 	return (lhs / denumerator);
 }
+template<class T>
+std::ofstream& operator<<(std::ofstream& ofile, Matrix const& m)
+{
+	ofile.write(reinterpret_cast<const char*>(&m.Rows_Count), sizeof(m.Rows_Count));
+	ofile.write(reinterpret_cast<const char*>(&m.Columns_Count), sizeof(m.Columns_Count));
+	for (auto& r : m.Rows)
+		ofile.write(reinterpret_cast<char*>(&r[0]), r.size() * sizeof(T));
+
+	return ofile;
+}
+template<class T>
+std::ifstream& operator>>(std::ifstream& ifile, Matrix& m)
+{
+	ifile.read(reinterpret_cast<char*>(&m.Rows_Count), sizeof(m.Rows_Count));
+	ifile.read(reinterpret_cast<char*>(&m.Columns_Count), sizeof(m.Columns_Count));
+	m.Rows.resize(m.Rows_Count);
+	for (auto& r : m.Rows)
+	{
+		r.resize(m.Columns_Count);
+		ifile.read(reinterpret_cast<char*>(&r[0]), r.size() * sizeof(T));
+	}
+	return ifile;
+}
+
 typedef matrix<Complex> Complex_matrix;
 typedef matrix<double> Double_matrix;
 typedef matrix<float> Float_matrix;
 typedef matrix<int> Int_matrix;
 typedef matrix<size_t> Size_t_matrix;
-
-typedef std::vector<Complex> Complex_vector;
-typedef std::vector<double> Double_vector;
-typedef std::vector<float> Float_vector;
-typedef std::vector<int> Int_vector;
-typedef std::vector<size_t> Size_t_vector;
