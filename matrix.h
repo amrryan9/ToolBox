@@ -168,27 +168,31 @@ public:	//***** Operator Overloading*******************
 	}
 	bool write(std::ofstream& ofile)const
 	{
-		ofile.write(reinterpret_cast<const char*>(&this->Rows_Count), sizeof(this->Rows_Count));
-		ofile.write(reinterpret_cast<const char*>(&this->Columns_Count), sizeof(this->Columns_Count));
-		for (Vector r : this->Rows)
-			ofile.write(reinterpret_cast<char*>(&r[0]), r.size()*sizeof(T));
-
+		ofile.write(reinterpret_cast<const char*>(&Rows_Count), sizeof(unsigned));
+		ofile.write(reinterpret_cast<const char*>(&Columns_Count), sizeof(unsigned));
+		for (auto& r : this->Rows)
+			ofile.write(reinterpret_cast<const char*>(&r[0]), static_cast<long unsigned>(static_cast<long unsigned >(Columns_Count) * static_cast<long unsigned>(sizeof(T))));
 		return !ofile.fail();
 	}
 	bool read(std::ifstream& ifile)
 	{
-		ifile.read(reinterpret_cast<char*>(&this->Rows_Count), sizeof(this->Rows_Count));
-		ifile.read(reinterpret_cast<char*>(&this->Columns_Count), sizeof(this->Columns_Count));
-		this->Rows.resize(this->Rows_Count);
-		for (Vector r : this->Rows)
-		{
-			r.resize(this->Columns_Count);
-			ifile.read(reinterpret_cast<char*>(&r[0]), r.size() * sizeof(T));
-		}
+		unsigned myRows_Count = 0;
+		unsigned myColumns_Count = 0;
+		ifile.read(reinterpret_cast<char*>(&myRows_Count), sizeof(unsigned));
+		ifile.read(reinterpret_cast<char*>(&myColumns_Count), sizeof(unsigned));
+		std::vector<Vector> myRows;
+		myRows.resize(myRows_Count);
+		for (Vector& r : myRows)
+			r.resize(myColumns_Count);
+		for (Vector& r : myRows)
+			ifile.read(reinterpret_cast<char*>(&r[0]), static_cast<long unsigned>(static_cast<long unsigned >(myColumns_Count) * static_cast<long unsigned>(sizeof(T))));
+		this->SelfReset();
+		for (size_t i=0;i< myRows_Count;i++)
+			for (size_t j = 0; j < myColumns_Count; j++)
+				this->AddItem(i, j, myRows.at(i).at(j));
 		return !ifile.fail();
 	}
-	friend std::ofstream& operator<<(std::ofstream& ofile, Matrix const& m);
-	friend std::ifstream& operator<<(std::ifstream& ifile, Matrix & m);
+
 
 public: // Matrix Operations
 	Matrix Conjugate() const
@@ -894,29 +898,6 @@ Matrix operator/(const Matrix& lhs, const matrix<T2>& rhs)
 		for (size_t j = 0; j < rhs.Columns_Count; j++)
 			denumerator.AddItem(i, j, static_cast<T>(rhs.GetItem(i, j)));
 	return (lhs / denumerator);
-}
-template<class T>
-std::ofstream& operator<<(std::ofstream& ofile, Matrix const& m)
-{
-	ofile.write(reinterpret_cast<const char*>(&m.Rows_Count), sizeof(m.Rows_Count));
-	ofile.write(reinterpret_cast<const char*>(&m.Columns_Count), sizeof(m.Columns_Count));
-	for (auto& r : m.Rows)
-		ofile.write(reinterpret_cast<char*>(&r[0]), r.size() * sizeof(T));
-
-	return ofile;
-}
-template<class T>
-std::ifstream& operator>>(std::ifstream& ifile, Matrix& m)
-{
-	ifile.read(reinterpret_cast<char*>(&m.Rows_Count), sizeof(m.Rows_Count));
-	ifile.read(reinterpret_cast<char*>(&m.Columns_Count), sizeof(m.Columns_Count));
-	m.Rows.resize(m.Rows_Count);
-	for (auto& r : m.Rows)
-	{
-		r.resize(m.Columns_Count);
-		ifile.read(reinterpret_cast<char*>(&r[0]), r.size() * sizeof(T));
-	}
-	return ifile;
 }
 
 typedef matrix<Complex> Complex_matrix;
