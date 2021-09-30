@@ -98,8 +98,9 @@ public: // Constructors
 	}
 
 public:	//***** Operator Overloading*******************
-	Matrix& operator=(const Matrix& m)
+	Matrix operator=(Matrix& m)
 	{
+		//cout << "ASSIGN" << endl;
 		this->SelfReset();
 		for (unsigned r = 0; r < m.Rows.size(); r++)
 		{
@@ -112,10 +113,21 @@ public:	//***** Operator Overloading*******************
 	}
 	Matrix& operator=(      Matrix&& m)
 	{
-	//	if(&m !=nullptr)
-	//	this = &m;
-		*this=std::move(m);//
-		return  *this;
+		//cout << " MOVE " << endl;
+		if (&m != nullptr)
+		{
+			for (size_t i = 0; i < m.Rows_Count; i++)
+				for (size_t j = 0; j < m.Columns_Count; j++)
+				{
+					this->AddItem(i, j, static_cast<T>(0));
+					(*this->GetItemPointer(i, j)) = std::move(*(m.GetItemPointer(i, j)));
+				}
+		}
+		else
+		{
+			cout << " ERROR IN MOVING, The Parameter has nullptr" << endl;
+		}
+		return *this;
 	}
 	Matrix operator+(const Matrix& m)
 	{
@@ -130,6 +142,7 @@ public:	//***** Operator Overloading*******************
 	}
 	Matrix operator*(const Matrix& m)
 	{
+		//cout << " MULTIPLY " << endl;
 		Matrix m2;
 		T x;
 		if (this->Columns_Count == m.Rows_Count)
@@ -140,12 +153,13 @@ public:	//***** Operator Overloading*******************
 					x = static_cast<T>(0);
 					for (size_t c = 0; c < m.Rows_Count; c++)
 					{
-
 						x = x + this->GetItem(r, c) * m.GetItem(c, i);
 					}
 					m2.AddItem(r, i, x);
 				}
 		}
+		else
+			cout << " Matrix Dimensions don't match" << endl;
 		return m2;
 	}
 	Matrix operator*(const T x)
@@ -197,27 +211,28 @@ public:	//***** Operator Overloading*******************
 public: // Matrix Operations
 	Matrix Conjugate() const
 	{
-if (this->Rows_Count > 0)
-{
-	if (typeid(this->GetItem(0, 0)).hash_code() == 3783695017)
-	{
-		Matrix m = *this;
-		for (unsigned r = 0; r < this->Rows.size(); r++)
+		if (this->Rows_Count > 0)
 		{
-			for (unsigned c = 0; c < this->Rows.at(r).size(); c++)
+			if (typeid(this->GetItem(0, 0)).hash_code() == 3783695017)
 			{
-				cout << typeid(this->GetItem(r, c)).hash_code() << endl;
-				//cout << " Converting now" << endl;
-				m.AddItem(r, c, std::conj(this->GetItem(r, c)));
+				Matrix m = *this;
+				for (unsigned r = 0; r < this->Rows.size(); r++)
+				{
+					for (unsigned c = 0; c < this->Rows.at(r).size(); c++)
+					{
+						cout << typeid(this->GetItem(r, c)).hash_code() << endl;
+						//cout << " Converting now" << endl;
+						m.AddItem(r, c, std::conj(this->GetItem(r, c)));
+					}
+				}
+				return m;
 			}
 		}
-		return m;
-	}
-}
-return *this;
+		return *this;
 	}
 	Matrix Transposed() const
 	{
+		//cout << " TRANSPOSE" << endl;
 		Matrix m;
 		for (unsigned r = 0; r < this->Rows.size(); r++)
 		{

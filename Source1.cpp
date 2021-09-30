@@ -1,4 +1,4 @@
-#include"matrix.h"
+#include"DFT.h"
 //#include"Header.h"
 typedef matrix<Complex> Complex_matrix;
 typedef matrix<double> Double_matrix;
@@ -77,74 +77,38 @@ int main(void)
 //	v.push_back(-9);
 //	Complex_matrix result;
 //	(AppendToTable<Complex, float>(result, C, v)).Show();
-///*
-	std::ofstream ofile("D:/sample5.bin", std::ios::binary);
-	if (ofile.is_open())
-	{
-		ofile.seekp(0);
-		C.write(ofile);
-		ofile.close();
-	}
-	std::ifstream ifile("D:/sample5.bin", std::ios::binary);
+//	DFT dd = C;
+//	dd.Show();
+//	DFT ff(C);
+//	ff.Show();
+	size_t c = 0;
+	Complex_matrix x,X;
+	x.AddItem(c, 0, 0); c++;
+	x.AddItem(c, 0, 0); c++;
+	x.AddItem(c, 0, 0); c++;
+	x.AddItem(c, 0, 0); c++;
+	x.AddItem(c, 0, 0); c++;
+	x.AddItem(c, 0, 0); c++;
+	x.AddItem(c, 0, 0); c++;
+	x.AddItem(c, 0, 0); c++;
 
+	x.AddItem(c, 0, 1); c++;
+	x.AddItem(c, 0, 1); c++;
+	x.AddItem(c, 0, 1); c++;
+	x.AddItem(c, 0, 1); c++;
 
-
-	if (ifile.is_open())
-	{
-		ifile.seekg(0);
-		try {
-			if (!E.read(ifile))cout << "KKKKKKKKKKKKKK" << endl;
-		}
-//		catch(const ifstream::failure& e){
-//			ifile.close();
-//			cout << " Go To Hell" << endl;
-//		}
-		catch (const std::ios_base::failure& fail) {
-			cout << " Caught here" << endl;
-			std::cout << fail.what() << '\n';
-		}
-		ifile.close();
-	}
-	
-//	D.Show();
+	x.AddItem(c, 0, 0); c++;
+	x.AddItem(c, 0, 0); c++;
+	x.AddItem(c, 0, 0); c++;
+	x.AddItem(c, 0, 0); c++;
+	x.AddItem(c, 0, 0); c++;
+	x.AddItem(c, 0, 0); c++;
+	x.AddItem(c, 0, 0); c++;
+	x.AddItem(c, 0, 0); c++;
+	x.Show();
+	DFT W(20);
+	W.Show();
+	E = (W*x);
 	E.Show();
-//*/
-/*
-	WirelessPower P1(D);
-	if (!P1.write(ofile))cout << "LLLLLLLLLLLLLLLLL" << endl;;
-	WirelessPower P2;
-	//	P2.Show();
-	if (!P2.read(ifile))cout << "KKKKKKKKKKKKKKKKKKK" << endl;;
-	P1.Show();
-	P2.Show();
-//	*/
-/*
-	unsigned var1 = 10; //for (auto c : buffer)cout << c; cout << endl;
-	unsigned var2 = 12; //for (auto c : buffer3)cout << c;
-	ofstream myFile("D:/data.bin", ios::out | ios::binary);
-	if (myFile.is_open())
-	{
-		myFile.seekp(0);
-		myFile.write(reinterpret_cast<const char*>(&var1), sizeof(unsigned));
-		myFile.write(reinterpret_cast<const char*>(&var2), sizeof(unsigned));
-		myFile.close();
-	}
-	cout << endl;
-	
-	
-	unsigned var3=0;
-	unsigned var4=0;
-	ifstream myFile2("D:/data.bin", ios::in | ios::binary);
-	if (myFile2.is_open())
-	{
-		myFile2.seekg(0);
-		myFile2.read(reinterpret_cast<char*>(&var3), sizeof(unsigned));
-		myFile2.read(reinterpret_cast<char*>(&var4), sizeof(unsigned));
-		myFile2.close();
-	}
-	//for (auto c : buffer2)cout << c; cout << endl;
-	cout << var3 << " " << var4 << endl;
-	//for (auto c : buffer4)cout << c; cout << endl;
-//*/
 	return 0;
 }
