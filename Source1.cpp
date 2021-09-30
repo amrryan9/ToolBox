@@ -9,8 +9,8 @@ int main(void)
 	//Double_matrix A, B , C, D,E;
 	//Float_matrix A, B, C, D,E;
 	//Int_matrix A, B, C, D,E;
-	Complex_matrix C,D,E;
-	/*
+	Complex_matrix C,D,E,I;
+//	/*
 	C.AddItem(0, 0, complex<double>(12.3, 3.1));
 	C.AddItem(0, 1, complex<double>(1.3, -3.1));
 	C.AddItem(0, 2, complex<double>(2.3, 0.1));
@@ -22,8 +22,8 @@ int main(void)
 	C.AddItem(2, 0, complex<double>(12.3, 3.1));
 	C.AddItem(2, 1, complex<double>(10.3, -7.1));
 	C.AddItem(2, 2, complex<double>(12.0, 5.1));
-	*/
-//	/*
+//	*/
+	/*
 	
 	C.AddItem(0, 0, 12.3);
 	C.AddItem(0, 1, 1.3);
@@ -50,21 +50,18 @@ int main(void)
 	C.AddItem(2, 1, 10);
 	C.AddItem(2, 2, 12);
 	*/
-	C.Show();
+	C.Show(RECT);
+	C.Conjugate().Show();
 //	C.WriteFile("D://Test.csv");
-
-
 	//	C.Show();
-		D=C.Conjugate();
+	D=C.Conjugate();
 //	D = C;
 	//	C.Show();
-//	D.Show();
-//	D.Inverse().Show();
-
+	D.Show();
+	D.Inverse().Show();
 	//	C1.Show();
 	(D * D.Inverse()).Show();
 	//	D.SelfSwapRows(0, 1);
-
 	//	D.SelfSwapColumns(0, 1);
 //	D.Show();
 //	std::vector<float>v;
@@ -105,10 +102,12 @@ int main(void)
 	x.AddItem(c, 0, 0); c++;
 	x.AddItem(c, 0, 0); c++;
 	x.AddItem(c, 0, 0); c++;
-	x.Show(POLAR);
+//	x.Show(RECT);
 	DFT W(20,UNITARY::YES);
-	W.Show(POLAR);
+//	W.Show(RECT);
 	E = (W*x);
-	E.Show(POLAR);
+//	E.Show(RECT);
+	I = W * W.ConjugateTransposed();
+//	I.Show(RECT,0);
 	return 0;
 }

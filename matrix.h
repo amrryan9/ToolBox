@@ -465,21 +465,21 @@ public: // Getters
 		return &(this->Rows.at(0).at(0));
 	}
 public: //Output & Display
-	void Show()
+	void Show(int round_digits=-1)
 	{
 		if (this->Rows_Count > 0)
 		{
 			if (typeid(this->GetItem(0, 0)).hash_code() == 3783695017)
 			{
-				(static_cast<Matrix>(*this)).Show(RECT);
+				(static_cast<Matrix>(*this)).Show(RECT, round_digits);
 			}
 			else
 			{
-				Show_NonComplex();
+				Show_NonComplex(round_digits);
 			}
 		}
 	}
-	void Show_NonComplex()
+	void Show_NonComplex(int round_digits)
 	{
 		std::string title = "  ********** Matrix (whatever)**********************";
 		std::cout << title;
@@ -494,8 +494,13 @@ public: //Output & Display
 			for (T& c : r)
 			{
 				std::cout  << " ";
-			//	std::cout << "\t";
-				std::cout << setw(10) << c;
+				if (round_digits > -1)
+				{
+					cout << fixed;
+					std::cout << setw(10) << setprecision(round_digits)<< Round(static_cast<Complex>(c).real(), round_digits);
+				}
+				else
+					std::cout << setw(10) << Round(static_cast<Complex>(c).real(), 3);
 			}
 			i++;
 			std::cout << std::endl;
@@ -504,7 +509,7 @@ public: //Output & Display
 		for (int tt = 0; tt < (24 + static_cast<int>(this->Columns_Count) * 26 - static_cast<int>(title.size())); tt++)cout << "*";
 		cout << endl;
 	}
-	void Show(ComplexForm form)
+	void Show(ComplexForm form, int round_digits = -1)
 	{
 		
 		string title;
@@ -523,12 +528,24 @@ public: //Output & Display
 				for (auto c_auto : r)
 				{
 					Complex c = static_cast<Complex>(c_auto);
-					double Real = Round2(c.real(), 3);
-					double Imaginary = Round2(c.imag(), 3);
+					double Real{ 0.0 };
+					double Imaginary{ 0.0 };
 					std::cout << " (";
-					if (Imaginary < 0)std::cout << setw(10) << Real << " -j" << setw(10) << -1* Imaginary << ")";
-					else             std::cout << setw(10) << Real << " +j" << setw(10) << Imaginary << ")";
-
+					if (round_digits > -1)
+					{
+						cout << fixed;
+						Real= Round2(c.real(), static_cast<float>(round_digits));
+						Imaginary = Round2(c.imag(), static_cast<float>(round_digits));
+						if (Imaginary < 0)std::cout << setw(10) << setprecision(round_digits) << Real << " -j" << setw(10) << setprecision(round_digits) << -1 * Imaginary << ")";
+						else             std::cout << setw(10) << setprecision(round_digits) << Real << " +j" << setw(10) << setprecision(round_digits) << Imaginary << ")";
+					}
+					else
+					{
+						Real = Round(c.real(), 3);
+						Imaginary = Round(c.imag(), 3);
+						if (Imaginary < 0)std::cout << setw(10) << Real << " -j" << setw(10) << -1 * Imaginary << ")";
+						else             std::cout << setw(10) << Real << " +j" << setw(10) << Imaginary << ")";
+					}
 				}
 				i++;
 				std::cout << std::endl;
@@ -550,11 +567,23 @@ public: //Output & Display
 				for (auto c_auto : r)
 				{
 					Complex c = static_cast<Complex>(c_auto);
-					phase = Round(std::arg(c),3);
-					mag = Round2(std::abs(c),3);
 					std::cout << " ";
-					std::cout << setw(10) << mag << " |_";
-					cout << setw(7) << phase;
+					if (round_digits > -1)
+					{
+						cout << fixed;
+						phase = Round(std::arg(c), static_cast<float>(round_digits));
+						mag = Round(std::abs(c), static_cast<float>(round_digits));
+						std::cout << setw(10) << setprecision(round_digits) << mag << " |_";
+						cout << setw(7) << setprecision(round_digits) << phase;
+					}
+					else
+					{
+						phase = Round(std::arg(c), 3);
+						mag = Round2(std::abs(c), 3);
+						std::cout << setw(10) << mag << " |_";
+						cout << setw(7) << phase;
+					}
+					
 				}
 				i++;
 				std::cout << std::endl;
@@ -878,7 +907,7 @@ public: //Selfies
 		this->Rows_Count = 0;
 	}
 public: //Tools
-	double Round(double n, float d);
+	float Round(double n, float d);
 	double Round2(double n, float d);
 	string PrintComplex(Complex n, ComplexForm form, float d);
 public:
@@ -931,10 +960,10 @@ typedef matrix<int> Int_matrix;
 typedef matrix<size_t> Size_t_matrix;
 
 template <class T>
-double Matrix::Round(double n, float d)
+float Matrix::Round(double n, float d)
 {
 	double value = static_cast<int>((n)*pow(10.0, d) + .5);
-	return static_cast<double>(value / pow(10.0, d));
+	return static_cast<float>(value / pow(10.0, d));
 }
 template <class T>
 double Matrix::Round2(double n, float d)
