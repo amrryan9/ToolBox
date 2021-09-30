@@ -50,19 +50,19 @@ int main(void)
 	C.AddItem(2, 1, 10);
 	C.AddItem(2, 2, 12);
 	*/
-//	C.Show();
+	C.Show();
 //	C.WriteFile("D://Test.csv");
 
 
 	//	C.Show();
-	//	D=C.Conjugate();
+		D=C.Conjugate();
 //	D = C;
 	//	C.Show();
 //	D.Show();
 //	D.Inverse().Show();
 
 	//	C1.Show();
-//	(D * D.Inverse()).Show();
+	(D * D.Inverse()).Show();
 	//	D.SelfSwapRows(0, 1);
 
 	//	D.SelfSwapColumns(0, 1);
@@ -105,10 +105,10 @@ int main(void)
 	x.AddItem(c, 0, 0); c++;
 	x.AddItem(c, 0, 0); c++;
 	x.AddItem(c, 0, 0); c++;
-	x.Show();
-	DFT W(20);
-	W.Show();
+	x.Show(POLAR);
+	DFT W(20,UNITARY::YES);
+	W.Show(POLAR);
 	E = (W*x);
-	E.Show();
+	E.Show(POLAR);
 	return 0;
 }

@@ -98,7 +98,7 @@ public: // Constructors
 	}
 
 public:	//***** Operator Overloading*******************
-	Matrix operator=(Matrix& m)
+	Matrix operator=(const Matrix& m)
 	{
 		//cout << "ASSIGN" << endl;
 		this->SelfReset();
@@ -220,7 +220,7 @@ public: // Matrix Operations
 				{
 					for (unsigned c = 0; c < this->Rows.at(r).size(); c++)
 					{
-						cout << typeid(this->GetItem(r, c)).hash_code() << endl;
+						//cout << typeid(this->GetItem(r, c)).hash_code() << endl;
 						//cout << " Converting now" << endl;
 						m.AddItem(r, c, std::conj(this->GetItem(r, c)));
 					}
@@ -284,17 +284,7 @@ public: // Matrix Operations
 		
 		if constexpr (std::is_same_v<T, int> || std::is_same_v<T, unsigned int> || std::is_same_v<T, char> || std::is_same_v<T, unsigned char> || std::is_same_v<T, wchar_t> || std::is_same_v<T, long int> || std::is_same_v<T, long unsigned>)//  
 		{
-	//		matrix<double> alias;
-	//		for (size_t ii=0;ii<this->Rows_Count;ii++)
-	//		{
-	//			for (size_t jj = 0; jj < this->Columns_Count; jj++)
-	//			{
-	//				alias.AddItem(ii, jj,this->GetItem(ii,jj) );
-	//			}
-	//		}
-	//		return alias.Inverse();
 			cout << " WARNING : Integer types are not supported in Inverse. use float type instead " << endl;
-
 		}
 		Matrix N;
 		if (this->Determinant() == static_cast<T>(0))
@@ -491,72 +481,90 @@ public: //Output & Display
 	}
 	void Show_NonComplex()
 	{
-		std::cout << " \t ********************* matrix (whatever)**************" << std::endl;
+		std::string title = "  ********** Matrix (whatever)**********************";
+		std::cout << title;
+		for (int tt = 0; tt < (24 + this->Columns_Count * 10 - title.size()); tt++)cout << "*";
+		cout << endl;
 		size_t i = 0;
 		for (Vector r : Rows)
 		{
 			std::cout << setw(10) << " ";
-			std::cout << " " << i;
+			std::cout << setw(4) << i;
 
 			for (T& c : r)
 			{
-				std::cout << setw(30) << " ";
-				std::cout << "\t";
-				std::cout << c;
+				std::cout  << " ";
+			//	std::cout << "\t";
+				std::cout << setw(10) << c;
 			}
 			i++;
 			std::cout << std::endl;
 		}
-		std::cout << " \t **************************************************************" << std::endl;
+		std::cout << "  **************************************************";
+		for (int tt = 0; tt < (24 + static_cast<int>(this->Columns_Count) * 26 - static_cast<int>(title.size())); tt++)cout << "*";
+		cout << endl;
 	}
 	void Show(ComplexForm form)
 	{
+		
+		string title;
 		size_t i = 0;
 		switch (form)
 		{
 		case RECT:
-			std::cout << " \t ********************* Matrix (real , imaginary)**************" << std::endl;
+			title = "  ********** Matrix (real , imaginary)**************";
+			std::cout << title ;
+			for (int tt = 0; tt < (24 + static_cast<int>(this->Columns_Count) * 26 - static_cast<int>(title.size())); tt++)cout << "*";
+			cout << endl;
 			for (auto r : Rows)
 			{
 				std::cout << setw(10) << " ";
-				std::cout << " " << i;
+				std::cout << setw(4) << i;
 				for (auto c_auto : r)
 				{
 					Complex c = static_cast<Complex>(c_auto);
-					std::cout << "\t(";
-					if (c.real() > 0)std::cout << " ";
-					if (c.imag() < 0)std::cout << c.real() << "\t-j" << setw(13) << -c.imag() << ")";
-					else             std::cout << c.real() << "\t+j" << setw(13) << c.imag() << ")";
+					double Real = Round2(c.real(), 3);
+					double Imaginary = Round2(c.imag(), 3);
+					std::cout << " (";
+					if (Imaginary < 0)std::cout << setw(10) << Real << " -j" << setw(10) << -1* Imaginary << ")";
+					else             std::cout << setw(10) << Real << " +j" << setw(10) << Imaginary << ")";
 
 				}
 				i++;
 				std::cout << std::endl;
 			}
+			std::cout << "  **************************************************";
+			for (int tt = 0; tt < (24 + static_cast<int>(this->Columns_Count) * 26 - static_cast<int>(title.size())); tt++)cout << "*";
+			cout << endl;
 			break;
 		case POLAR:
+			title = "  ********** Matrix (magnitude |_ phase(rad))*******";	
+			std::cout << title;
+			for (int tt = 0; tt < (24 + static_cast<int>(this->Columns_Count) * 21 - static_cast<int>(title.size())); tt++)cout << "*";
+			cout << endl;
 			double phase, mag;
-			std::cout << " \t ********************* Matrix (magnitude |_ phase(rad))**************" << std::endl;
 			for (auto r : Rows)
 			{
 				std::cout << setw(10) << " ";
-				std::cout << " " << i;
+				std::cout << setw(4) << i;
 				for (auto c_auto : r)
 				{
 					Complex c = static_cast<Complex>(c_auto);
-					phase = std::arg(c);
-					mag = std::abs(c);//sqrt(pow(c.real(), 2) + pow(c.imag(), 2));
-					std::cout << "\t";
-					std::cout << mag << "\t|_";
-					if (phase > 0)std::cout << " ";
-					cout << setw(5) << phase;
+					phase = Round(std::arg(c),3);
+					mag = Round2(std::abs(c),3);
+					std::cout << " ";
+					std::cout << setw(10) << mag << " |_";
+					cout << setw(7) << phase;
 				}
 				i++;
 				std::cout << std::endl;
 			}
+			std::cout << "  **************************************************";
+			for (int tt = 0; tt < (24 + static_cast<int>(this->Columns_Count) * 21 - static_cast<int>(title.size())); tt++)cout << "*";
+			cout << endl;
 			break;
 		}
-
-		std::cout << " \t **************************************************************" << std::endl;
+		
 	}
 	void WriteFile(std::string file_out, FileForm form = FileForm::PLAIN)
 	{
@@ -643,10 +651,10 @@ public: //Output & Display
 				for (auto ii : r)
 				{
 					Complex i = static_cast<Complex>(ii);
-					converter << i.real(); converter >> s; converter.clear();
+					converter << Round2(i.real(),3); converter >> s; converter.clear();
 					row.push_back(s);
 					row.push_back(separator);
-					converter << i.imag(); converter >> s; converter.clear();
+					converter << Round2(i.imag(),3); converter >> s; converter.clear();
 					row.push_back(s);
 					row.push_back(separator);
 				}
@@ -666,8 +674,8 @@ public: //Output & Display
 				for (auto ii : r)
 				{
 					Complex i = static_cast<Complex>(ii);
-					phase = std::arg(i);
-					mag = std::abs(i);
+					phase = Round(std::arg(i),3);
+					mag = Round2(std::abs(i),3);
 					converter << mag; converter >> s; converter.clear();
 					row.push_back(s);
 					row.push_back(separator);
@@ -748,8 +756,6 @@ public: //Output & Display
 			row.clear();
 			i_index++;
 		}
-	//	cout << " that contains : " << endl;
-	//	this->Show();
 	}
 public: // Convert to Tables. A Table that contains the rows of the item matrices in one table record per each matrix item
 	static Matrix AppendToTable(Matrix& table, Matrix& item)
@@ -871,7 +877,10 @@ public: //Selfies
 		this->Columns_Count = 0;
 		this->Rows_Count = 0;
 	}
-
+public: //Tools
+	double Round(double n, float d);
+	double Round2(double n, float d);
+	string PrintComplex(Complex n, ComplexForm form, float d);
 public:
 	std::vector<Vector> Rows;
 	unsigned Rows_Count;
@@ -920,3 +929,63 @@ typedef matrix<double> Double_matrix;
 typedef matrix<float> Float_matrix;
 typedef matrix<int> Int_matrix;
 typedef matrix<size_t> Size_t_matrix;
+
+template <class T>
+double Matrix::Round(double n, float d)
+{
+	double value = static_cast<int>((n)*pow(10.0, d) + .5);
+	return static_cast<double>(value / pow(10.0, d));
+}
+template <class T>
+double Matrix::Round2(double n, float d)
+{
+	std::stringstream converter;
+	string number, exponent;
+	int e{ 0 };
+	double n2{ n };
+	float m, m_rounded;
+	converter << n; converter >> number; converter.clear();
+	int position = number.find("e");
+	if (position < 0)position = number.find("E");
+	if (position > 0)
+	{
+		exponent = number.substr(position + 1);
+		converter << exponent; converter >> e;
+		m = n * pow(10, -1 * e);
+		m_rounded = Round(m, d);
+		return m_rounded * pow(10, e);
+	}
+	else // Make sure the rounding dosn't kill the value
+		return Round(n, d);
+
+
+}
+template <class T>
+string Matrix::PrintComplex(Complex n, ComplexForm form, float d)
+{
+	std::stringstream converter;
+	string A, B, joint;
+	double a{ 0.0 }, b{ 0.0 };
+	switch (form)
+	{
+	case RECT:
+		a = Round2(std::real(n), d);
+		b = Round2(std::imag(n), d);
+		if (b < 0 || b == 0)
+		{
+			joint = "-j";
+			b = b * -1;
+		}
+		else
+			joint = "+j";
+		break;
+	case POLAR:
+		a = std::abs(n);
+		b = std::arg(n);
+		joint = "|_ ";
+		break;
+	}
+	converter << a; converter >> A; converter.clear();
+	converter << b; converter >> B; converter.clear();
+	return A + joint + B;
+}
