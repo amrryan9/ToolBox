@@ -12,6 +12,8 @@
 #include <type_traits>
 #include <typeinfo>
 #include <type_traits>
+#include <valarray>
+
 
 /*
 
@@ -32,9 +34,14 @@ size_t size() { return count; } // Accessor for count
 */
 
 using namespace std;
+
+
 enum ComplexForm { RECT, POLAR };
 enum FileForm { PLAIN, DECORATED };
 typedef std::complex<double> Complex;
+typedef std::complex<float> ComplexF;
+typedef std::valarray<Complex> CArray;
+typedef std::valarray<ComplexF> CArrayF;
 
 
 typedef std::vector<Complex> Complex_vector;
@@ -100,7 +107,7 @@ public: // Constructors
 public:	//***** Operator Overloading*******************
 	Matrix operator=(const Matrix& m)
 	{
-		//cout << "ASSIGN" << endl;
+	//	cout << "ASSIGN" << endl;
 		this->SelfReset();
 		for (unsigned r = 0; r < m.Rows.size(); r++)
 		{
@@ -113,7 +120,8 @@ public:	//***** Operator Overloading*******************
 	}
 	Matrix& operator=(      Matrix&& m)
 	{
-		//cout << " MOVE " << endl;
+	//	cout << " MOVE " << endl;
+		this->SelfReset();
 		if (&m != nullptr)
 		{
 			for (size_t i = 0; i < m.Rows_Count; i++)
@@ -481,46 +489,72 @@ public: //Output & Display
 	}
 	void Show_NonComplex(int round_digits)
 	{
-		std::string title = "  ********** Matrix (whatever)**********************";
+		std::string title = "  ***************** Matrix (whatever)***************";
+		std::string title2 = "          COL#";
+		std::string title3 = "  ******* ROW# *************************************";
+		
 		std::cout << title;
-		for (int tt = 0; tt < (24 + this->Columns_Count * 10 - title.size()); tt++)cout << "*";
+		for (int tt = 0; tt < (24 + static_cast<int>(this->Columns_Count) * 10 - static_cast<int>(title.size())); tt++)cout << "*";
 		cout << endl;
+
+		std::cout << title2;
+		for (int cc = 0; cc < this->Columns_Count; cc++)
+			cout << setw(10) << cc;
+		cout <<endl;
+
+		std::cout << title3;
+		for (int tt = 0; tt < (24 + static_cast<int>(this->Columns_Count) * 10 - static_cast<int>(title.size())); tt++)cout << "*";
+		cout << endl;
+
 		size_t i = 0;
 		for (Vector r : Rows)
 		{
 			std::cout << setw(10) << " ";
 			std::cout << setw(4) << i;
 
-			for (T& c : r)
+			for (auto& c : r)
 			{
-				std::cout  << " ";
+				//std::cout  << " ";
 				if (round_digits > -1)
 				{
 					cout << fixed;
-					std::cout << setw(10) << setprecision(round_digits)<< Round(static_cast<Complex>(c).real(), round_digits);
+					std::cout << setw(10) << setprecision(round_digits) << Round2(static_cast<Complex>(c).real(), round_digits);
 				}
 				else
-					std::cout << setw(10) << Round(static_cast<Complex>(c).real(), 3);
+					std::cout << setw(10) << Round2(static_cast<Complex>(c).real(),3);
 			}
 			i++;
 			std::cout << std::endl;
 		}
 		std::cout << "  **************************************************";
-		for (int tt = 0; tt < (24 + static_cast<int>(this->Columns_Count) * 26 - static_cast<int>(title.size())); tt++)cout << "*";
+		for (int tt = 0; tt < (24 + static_cast<int>(this->Columns_Count) * 10 - static_cast<int>(title.size())); tt++)cout << "*";
 		cout << endl;
 	}
 	void Show(ComplexForm form, int round_digits = -1)
 	{
 		
-		string title;
+		string title, title2, title3;
 		size_t i = 0;
 		switch (form)
 		{
 		case RECT:
-			title = "  ********** Matrix (real , imaginary)**************";
+			title = "  ************* Matrix (real , imaginary)***********";
+			title2 = "          COL# ";
+			title3 = "  ******* ROW# *************************************";
+			
 			std::cout << title ;
 			for (int tt = 0; tt < (24 + static_cast<int>(this->Columns_Count) * 26 - static_cast<int>(title.size())); tt++)cout << "*";
 			cout << endl;
+
+			std::cout << title2;
+			for (int cc = 0; cc < this->Columns_Count; cc++)
+				cout << setw(12) << cc<<setw(14)<<" ";
+			cout << endl;
+
+			std::cout << title3;
+			for (int tt = 0; tt < (24 + static_cast<int>(this->Columns_Count) * 26 - static_cast<int>(title.size())); tt++)cout << "*";
+			cout << endl;
+
 			for (auto r : Rows)
 			{
 				std::cout << setw(10) << " ";
@@ -555,8 +589,20 @@ public: //Output & Display
 			cout << endl;
 			break;
 		case POLAR:
-			title = "  ********** Matrix (magnitude |_ phase(rad))*******";	
+			title = "  ************* Matrix (magnitude |_ phase(rad))****";	
+			title2 = "          COL# ";
+			title3 = "  ******* ROW# *************************************";
+
 			std::cout << title;
+			for (int tt = 0; tt < (24 + static_cast<int>(this->Columns_Count) * 21 - static_cast<int>(title.size())); tt++)cout << "*";
+			cout << endl;
+
+			std::cout << title2;
+			for (int cc = 0; cc < this->Columns_Count; cc++)
+				cout << setw(10) << cc<<setw(11)<<" ";
+			cout << endl;
+
+			std::cout << title3;
 			for (int tt = 0; tt < (24 + static_cast<int>(this->Columns_Count) * 21 - static_cast<int>(title.size())); tt++)cout << "*";
 			cout << endl;
 			double phase, mag;
@@ -907,9 +953,160 @@ public: //Selfies
 		this->Rows_Count = 0;
 	}
 public: //Tools
-	float Round(double n, float d);
-	double Round2(double n, float d);
-	string PrintComplex(Complex n, ComplexForm form, float d);
+	static float Round(double n, float d);
+	static double Round2(double n, float d);
+	static string PrintComplex(Complex n, ComplexForm form, float d);
+
+public: // Statistics
+	T Mean()// mean of all items
+	{
+		T sum = static_cast<T>(0);
+		for(auto& r:Rows)
+			for (auto& c : r)
+			{
+				sum = sum + c;
+			}
+		return sum / static_cast<T>(Columns_Count * Rows_Count);
+	}
+	T Var()// mean of all items
+	{
+		T mean = Mean();
+		T sum = static_cast<T>(0);
+		for (auto& r : Rows)
+			for (auto& c : r)
+			{
+				sum = sum + pow(abs(c-mean),2);
+			}
+		return sum / static_cast<T>((Columns_Count * Rows_Count)-1);
+	}
+	T Std()// standard deviation of all items
+	{
+		return sqrt(this->Var());
+	}
+	T Max()// Maximum of all items
+	{
+		if (typeid(this->GetItem(0, 0)).hash_code() == 3783695017)
+		{
+			return Max_Complex();
+		}
+		else
+		{
+			return Max_nonComplex();
+		}
+	}
+	T Max_Complex()
+	{
+		T max = static_cast<T>(0);
+		if (this->Rows_Count > 0 && this->Columns_Count > 0)
+		{
+			max = this->GetItem(0, 0);
+			for (auto& r : Rows)
+				for (auto& c : r)
+				{
+					if (std::abs(static_cast<Complex>(max)) < std::abs(static_cast<Complex>(c)))
+					{
+						max = c;
+					}
+				}
+		}
+		return max;
+	}
+	T Max_nonComplex()
+	{
+		T max = static_cast<T>(0);
+		if (this->Rows_Count > 0 && this->Columns_Count > 0)
+		{
+			max = this->GetItem(0, 0);
+			for (auto& r : Rows)
+				for (auto& c : r)
+				{
+					if (std::real(static_cast<Complex>(max)) < std::real(static_cast<Complex>(c)))
+					{
+						max = c;
+					}
+				}
+		}
+		return max;
+	}
+	T Min()// Minimum of all items
+	{
+		if (typeid(this->GetItem(0, 0)).hash_code() == 3783695017)
+		{
+			return Min_Complex();
+		}
+		else
+		{
+			return Min_nonComplex();
+		}
+	}
+	T Min_Complex()
+	{
+		T min = static_cast<T>(0);
+		if (this->Rows_Count > 0 && this->Columns_Count > 0)
+		{
+			min = this->GetItem(0, 0);
+			for (auto& r : Rows)
+					for (auto& c : r)
+					{
+						if (std::abs(static_cast<Complex>(min)) > std::abs(static_cast<Complex>(c)))
+						{
+							min = c;
+						}
+					}
+		}
+		return min;
+	}
+	T Min_nonComplex()
+	{
+		T min = static_cast<T>(0);
+		if (this->Rows_Count > 0 && this->Columns_Count > 0)
+		{
+			min = this->GetItem(0, 0);
+			for (auto& r : Rows)
+				for (auto& c : r)
+				{
+					if (std::real(static_cast<Complex>(min)) > std::real(static_cast<Complex>(c)))
+					{
+						min = c;
+					}
+				}
+		}
+		return min;
+	}
+	public: // Complex matrix specials
+		static matrix<Complex> ConvertToMatrix(CArray& x)
+		{
+			matrix<Complex> result;
+			size_t i{ 0 };
+			for (auto& v : x)
+			{
+				result.AddItem(i, 0, v);
+				i++;
+			}
+			return result;
+		}
+		static CArray ConvertFromMatrix(matrix<Complex>& x)
+		{
+			CArray result;
+			if (x.Columns_Count == 1)
+			{
+				result.resize(x.Rows_Count);
+				for (size_t i = 0; i < x.Rows_Count; i++)
+					result[i] = x.GetItem(i, 0);
+			}
+			else if (x.Rows_Count == 1)
+			{
+				result.resize(x.Columns_Count);
+				for (size_t i = 0; i < x.Columns_Count; i++)
+					result[i] = x.GetItem(0, i);
+			}
+			else
+			{
+				cout << " ERROR NOT A VECTOR " << endl;
+			}
+			return result;
+		}
+
 public:
 	std::vector<Vector> Rows;
 	unsigned Rows_Count;
@@ -954,6 +1151,7 @@ Matrix operator/(const Matrix& lhs, const matrix<T2>& rhs)
 }
 
 typedef matrix<Complex> Complex_matrix;
+typedef matrix<ComplexF> ComplexF_matrix;
 typedef matrix<double> Double_matrix;
 typedef matrix<float> Float_matrix;
 typedef matrix<int> Int_matrix;
@@ -1017,4 +1215,124 @@ string Matrix::PrintComplex(Complex n, ComplexForm form, float d)
 	converter << a; converter >> A; converter.clear();
 	converter << b; converter >> B; converter.clear();
 	return A + joint + B;
+}
+template <class T>
+Matrix Kronecker(Matrix& A, Matrix& B)
+{
+	Matrix R;
+	for (size_t i1=0;i1<A.Rows_Count;i1++)
+		for (size_t j1 = 0; j1 < A.Columns_Count; j1++)
+			for (size_t i2 = 0; i2 < B.Rows_Count; i2++)
+				for (size_t j2 = 0; j2 < B.Columns_Count; j2++)
+				{
+					R.AddItem(i2+(i1*B.Rows_Count),j2+(j1*B.Columns_Count),A.GetItem(i1, j1)* B.GetItem(i2, j2));
+				}
+	return R;
+}
+
+template <class T>
+valarray<T> Kronecker(valarray<T>& A, valarray<T>& B) // Kronker for vectors only
+{
+	size_t N1 = A.size();
+	size_t N2 = B.size();
+	valarray<T> R(N1*N2);
+	size_t k{ 0 };
+	for (size_t i1 = 0; i1 < N1; i1++)
+		for (size_t j1 = 0; j1 < N2; j1++)
+		{
+			R[k]= A[i1] * B[j1];
+			k++;
+		}
+	return R;
+}
+
+template <class T>
+valarray<complex<T>> Conjugate(valarray<complex<T>>& A) // Kronker for vectors only
+{
+	size_t N1 = A.size();
+	valarray<complex<T>> R(N1);
+	size_t k{ 0 };
+	for (size_t i1 = 0; i1 < N1; i1++)
+	{
+		R[k] = std::conj(A[i1]);
+		k++;
+	}
+	return R;
+}
+
+template <class T>
+matrix<T> ConvertToMatrix(valarray<T>& x)
+{
+	matrix<T> result;
+	size_t i{ 0 };
+	for (auto& v : x)
+	{
+		result.AddItem(i, 0, v);
+		i++;
+	}
+	return result;
+}
+template <class T>
+valarray<T> ConvertFromMatrix(matrix<T>& x)
+{
+	valarray<T> result;
+	if (x.Columns_Count == 1)
+	{
+		result.resize(x.Rows_Count);
+		for (size_t i = 0; i < x.Rows_Count; i++)
+			result[i] = x.GetItem(i, 0);
+	}
+	else if (x.Rows_Count == 1)
+	{
+		result.resize(x.Columns_Count);
+		for (size_t i = 0; i < x.Columns_Count; i++)
+			result[i] = x.GetItem(0, i);
+	}
+	else
+	{
+		cout << " ERROR NOT A VECTOR " << endl;
+	}
+	return result;
+}
+template <class T>
+T Std(valarray<T> x)
+{
+	T mu;
+	valarray<T> y;
+	size_t Size = x.size();
+	if (Size > 1)
+	{
+		y.resize(Size);
+		mu = x.sum() / static_cast<T>(Size);
+		
+		size_t j{ 0 };
+		for (auto& i : x)
+		{
+			y[j] = pow(abs(i - mu), 2);
+			j++;
+		}
+		return sqrt(static_cast<T>(1.0 / static_cast<float>(Size - 1)) * y.sum());
+	}
+	return T(0);
+}
+template <class T>
+float Norm(Matrix m, int p)
+{
+	float sum=0;
+	for (auto& r : m.Rows)
+		for (auto& c : r)
+			sum = sum + pow(abs(c),p);
+	float root_power = 1.0 / static_cast<float>(p);
+	return pow(sum, root_power);
+}
+
+template <class T>
+Matrix Normalize(Matrix m)
+{
+	float norm_2 = Norm<T>(m, 2);
+	if (norm_2 > 0)
+	{
+		return (m * (1 / norm_2));
+	}
+	return m;
 }
