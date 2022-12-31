@@ -192,8 +192,28 @@ public:	//***** Operator Overloading*******************
 	{
 		ofile.write(reinterpret_cast<const char*>(&Rows_Count), sizeof(unsigned));
 		ofile.write(reinterpret_cast<const char*>(&Columns_Count), sizeof(unsigned));
-		for (auto& r : this->Rows)
-			ofile.write(reinterpret_cast<const char*>(&r[0]), static_cast<long unsigned>(static_cast<long unsigned >(Columns_Count) * static_cast<long unsigned>(sizeof(T))));
+
+		int chunk_row{ 0 }, chunk_column{ 0 },R{ static_cast<int>(Rows_Count) },C{ static_cast<int>(Columns_Count) };
+		if (R > 10) {
+			chunk_row = 10; 
+		}
+		else chunk_row = R;
+		R = R - 10;
+		if (C > 10) {
+			chunk_column = 10; 
+		}
+		else chunk_column = C;
+		C = C - 10;
+
+		for (size_t i=0; i < Rows_Count;i++)for (size_t j = 0; j < Columns_Count; j++)//for (auto& r : this->Rows)
+	//		for (auto& c : r)
+			{
+			//	ofile.write(reinterpret_cast<const char*>(&c), sizeof(T));
+			//	ofile.write(reinterpret_cast<const char*>(&r[0]), static_cast<long unsigned>(static_cast<unsigned >(Columns_Count) * static_cast<unsigned>(sizeof(T))));
+				
+			ofile.write(reinterpret_cast<const char*>(&(Rows.at(i).at(j))), sizeof(T));
+			}
+				
 		return !ofile.fail();
 	}
 	bool read(std::ifstream& ifile)
@@ -204,17 +224,38 @@ public:	//***** Operator Overloading*******************
 		ifile.read(reinterpret_cast<char*>(&myColumns_Count), sizeof(unsigned));
 		std::vector<Vector> myRows;
 		myRows.resize(myRows_Count);
-		for (Vector& r : myRows)
+		for (auto& r : myRows)
 			r.resize(myColumns_Count);
-		for (Vector& r : myRows)
-			ifile.read(reinterpret_cast<char*>(&r[0]), static_cast<long unsigned>(static_cast<long unsigned >(myColumns_Count) * static_cast<long unsigned>(sizeof(T))));
+		for (auto& r : myRows)
+		//	for (auto& c : r)
+		//	{
+		//		ifile.read(reinterpret_cast<char*>(&c), sizeof(T));
+		//	}
+			ifile.read(reinterpret_cast<char*>(&r[0]), static_cast<long unsigned>(static_cast<unsigned >(myColumns_Count) * static_cast<unsigned>(sizeof(T))));
 		this->SelfReset();
 		for (size_t i=0;i< myRows_Count;i++)
 			for (size_t j = 0; j < myColumns_Count; j++)
 				this->AddItem(i, j, myRows.at(i).at(j));
 		return !ifile.fail();
 	}
+	bool Save(std::string file_full_path)
+	{
+		std::ofstream out{ file_full_path , std::ios_base::out | std::ios_base::trunc };//+ extension
+		return this->write(out);
 
+	}
+	bool Load(std::string file_full_path)
+	{
+		cout << " Reading File :" << file_full_path << endl;
+		std::ifstream in_file{ file_full_path };
+		if (!in_file)
+		{
+			std::cerr << file_full_path << " file is not open." << std::endl;
+		//	exit(1);
+			return false;
+		}
+		return this->read(in_file);
+	}
 
 public: // Matrix Operations
 	Matrix Conjugate() const
@@ -765,7 +806,7 @@ public: //Output & Display
 			}
 		}
 	}
-	void WriteFile_NonComplex(std::string file_out, FileForm file_form = FileForm::PLAIN, string header = ".")
+	void WriteFile_NonComplex(std::string file_out, FileForm file_form = FileForm::PLAIN, int field_width = 12, string header = ".")
 	{
 		
 		// this function writes the matrix to a file
@@ -785,10 +826,11 @@ public: //Output & Display
 		std::string s, i_s;
 		size_t i_index = 0;
 		string separator, extension;
+		
 		switch (file_form)
 		{
 		case FileForm::PLAIN:
-			separator = "\t";
+			separator = " ";//" ";// 
 			extension = ".txt";
 			header = "";
 			break;
@@ -808,23 +850,31 @@ public: //Output & Display
 			break;
 		}
 		std::ofstream out{ file_out + extension, std::ios_base::out | std::ios_base::trunc };
-		std::ostream_iterator<string> out_iter2{ out, " " };
+		std::ostream_iterator<string> out_iter2{ out};//, " " 
 		if (file_form == FileForm::DECORATED)
 		{
 			std::copy(std::begin(row), std::end(row), out_iter2);
 			out_iter2 = "\n";
 			row.clear();
 		}
-
+		size_t counter_separator{ 0 };
+		int s_size{ 0 };
 		for (auto r : Rows)
 		{
-			converter << i_index; converter >> i_s; converter.clear(); row.push_back(i_s); row.push_back(separator);
-
+		//	converter << i_index; converter >> i_s; converter.clear(); row.push_back(i_s); row.push_back(separator);
+			counter_separator = 0;
 			for (auto i : r)
 			{
 				converter << i; converter >> s; converter.clear();
-				row.push_back(s);
-				row.push_back(separator);
+				row.push_back(s); //cout << field_width - s.size() << endl;
+				s_size = field_width - static_cast<int>(s.size());
+				if(counter_separator<(r.size()-1))
+					if(s_size>0)
+						for (size_t sep = 0; sep < s_size; sep++)
+							row.push_back(separator);
+					else
+						row.push_back(separator);
+				counter_separator++;
 			}
 			std::copy(std::begin(row), std::end(row), out_iter2);
 			out_iter2 = "\n";
